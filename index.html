@@ -788,6 +788,8 @@ try{S=JSON.parse(localStorage.getItem(dataKey(_last.code))||'{}');}catch(e){S={}
 if(_last.code&&!S.joueurCode)S.joueurCode=_last.code;
 if(_last.equipe&&!S.equipe)S.equipe=_last.equipe;
 if(!S.pen)S.pen={buts:0,tirs:0,serie:0,cur:0};
+// auto-reparation : la categorie prevue par le coach s'impose meme sur les donnees deja enregistrees
+try{if(typeof trouverCodeAutorise==='function'){const _ci=trouverCodeAutorise(S.joueurCode);if(_ci&&_ci.cat&&S.equipe!==_ci.cat){S.equipe=_ci.cat;}}}catch(e){}
 function persist(){try{
   if(S.joueurCode){localStorage.setItem(dataKey(S.joueurCode),JSON.stringify(S));localStorage.setItem(LAST_KEY,JSON.stringify({code:S.joueurCode,equipe:S.equipe||''}));}
   else{localStorage.setItem(dataKey('invite'),JSON.stringify(S));}
@@ -845,6 +847,8 @@ async function loginJoueur(){
       }
     }catch(e){}
   }
+  // La categorie definie par le coach dans CODES_AUTORISES est prioritaire sur tout (cloud, ancien test...)
+  if(codeInfo&&codeInfo.cat){S.equipe=codeInfo.cat;persist();}
   document.getElementById('login-screen').style.display='none';
   try{sessionStorage.setItem('cahierSession','1');}catch(e){}
   location.reload();
