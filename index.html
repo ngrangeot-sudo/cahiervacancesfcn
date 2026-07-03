@@ -206,6 +206,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
   #coach-dash.show{grid-template-columns:repeat(3,1fr);}
   #coach-dash.show>.card.wide{grid-column:1 / -1;}
 }
+@keyframes confchute{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(110vh) rotate(720deg)}}
 </style>
 </head>
 <body>
@@ -239,7 +240,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     </div>
     <button onclick="logoutJoueur()" title="Se deconnecter" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">Deconnexion</button>
   </div>
-  <div class="datebar"><div class="d"><span>Depart</span><b>Mar. 22 juil.</b></div><div class="d"><span>Reprise</span><b>Mar. 18 aout</b></div></div>
+  <div class="datebar"><div class="d"><span>Depart</span><b id="depart-date">Mer. 22 juil.</b></div><div class="d"><span>Reprise</span><b>Mar. 18 aout</b></div></div>
   <div class="countdown">Reprise dans <span id="cd">-</span> jours</div>
   <div class="devise">Quand on n'a pas tout donne, on n'a rien donne</div>
 </header>
@@ -277,6 +278,15 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     <div class="objline"><div class="ot"><span>Mauvais pied</span><span class="goal"><b id="og-mauvais">0</b> / <span id="og-mauvais-max">50</span></span></div><div class="bar"><i id="ob-mauvais" style="width:0%"></i></div></div>
     <div class="objline"><div class="ot"><span>Tete</span><span class="goal"><b id="og-tete">0</b> / <span id="og-tete-max">50</span></span></div><div class="bar"><i id="ob-tete" style="width:0%"></i></div></div>
     <p id="obj-msg" style="font-size:13px;font-weight:700;text-align:center;margin-top:10px;color:var(--blue)"></p>
+  </div>
+  <div class="card">
+    <h2>🔥 Le défi de la semaine</h2>
+    <p class="sub" id="defi-semaine-txt">Chargement...</p>
+  </div>
+  <div class="card">
+    <h2>📅 Ton assiduité</h2>
+    <p style="font-family:'Anton';font-size:34px;color:var(--blue);text-align:center;margin:4px 0"><span id="assiduite-n">0</span> jour<span id="assiduite-s"></span></p>
+    <p class="sub" style="text-align:center">avec ton cahier cet ete. La regularite, c'est le secret des champions !</p>
   </div>
   <div class="card full">
     <h2>❓ Comment ça marche ?</h2>
@@ -375,7 +385,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
 <section class="view" id="v-seances">
   <div class="card full">
     <h2>📅 Mon calendrier de l'été</h2>
-    <p class="sub">16 seances du 22 juillet au 18 aout. Touche une seance pour l'ouvrir, la faire et l'envoyer au coach.</p>
+    <p class="sub" id="seances-sub">Touche une seance pour l'ouvrir, la faire et l'envoyer au coach.</p>
     <div id="planning"></div>
     <div style="display:flex;gap:14px;justify-content:center;margin-top:12px;font-size:11px;font-weight:600;flex-wrap:wrap">
       <span style="color:var(--ok)">Faite</span><span style="color:var(--blue)">A faire</span><span style="color:#C9A800">Bonus</span><span style="color:var(--grey)">Repos</span>
@@ -579,10 +589,27 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     <div id="pendu"></div>
   </div>
   <div class="card full">
+    <h2>🧠 Le bon choix (tactique)</h2>
+    <p class="sub">Une situation de match, trois choix : trouve la meilleure decision, comme un vrai joueur !</p>
+    <div id="tact-list"></div>
+    <p style="font-size:14px;font-weight:700;color:var(--blue);text-align:center;margin-top:8px">Bonnes decisions : <span id="tact-score">0</span> / <span id="tact-total">0</span></p>
+  </div>
+  <div class="card full">
+    <h2>🕵️ Qui suis-je ?</h2>
+    <p class="sub">Devine le joueur mystere. Moins tu utilises d'indices, plus tu marques de points (3, 2 ou 1) !</p>
+    <div id="qsj-zone"></div>
+    <p style="font-size:14px;font-weight:700;color:var(--blue);text-align:center;margin-top:8px">Points : <span id="qsj-score">0</span> / <span id="qsj-max">0</span></p>
+  </div>
+  <div class="card full">
     <h2>Quiz foot expert</h2>
-    <p class="sub">Pour les vrais passionnes.</p>
+    <p class="sub">3 niveaux : commence facile, finis expert !</p>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="btn sm" id="qz-facile" style="flex:1" onclick="quizNiveau('facile')">Facile</button>
+      <button class="btn sm ghost" id="qz-moyen" style="flex:1" onclick="quizNiveau('moyen')">Moyen</button>
+      <button class="btn sm ghost" id="qz-difficile" style="flex:1" onclick="quizNiveau('difficile')">Expert</button>
+    </div>
     <div id="quiz-list"></div>
-    <p style="font-size:14px;font-weight:700;color:var(--blue);text-align:center;margin-top:8px">Score : <span id="quiz-score">0</span> / <span id="quiz-total">0</span></p>
+    <p style="font-size:14px;font-weight:700;color:var(--blue);text-align:center;margin-top:8px">Niveau : <span id="quiz-score">0</span> / <span id="quiz-total">0</span> &nbsp;-&nbsp; Total : <span id="quiz-score-tot">0</span> / <span id="quiz-total-tot">0</span></p>
   </div>
 </section>
 
@@ -625,6 +652,10 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
       </div>
       <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn sm" style="flex:1" onclick="loadCoachData()">Rafraichir</button><button class="btn ghost sm" style="flex:1" onclick="exportCSV()">Exporter (CSV)</button><button class="btn yellow sm" style="flex:1" onclick="pdfTousJoueurs()">Tous les PDF</button></div>
     </div>
+
+    <div class="card full"><h2>🏅 Classement Séances</h2><p class="sub">Qui a fait le plus de seances. Touche un nom pour ouvrir sa fiche.</p><div id="classement-seances"></div></div>
+    <div class="card full"><h2>🏅 Classement Jongle</h2><p class="sub">Total des records bon pied + mauvais pied + tete. Touche un nom pour ouvrir sa fiche.</p><div id="classement-jongle"></div></div>
+    <div class="card full"><h2>🏅 Classement Jeux</h2><p class="sub">Points cumules sur tous les jeux (quiz, tactique, qui suis-je, pendu, memoire...). Touche un nom pour ouvrir sa fiche.</p><div id="classement-jeux"></div></div>
 
     <div class="card full"><h2>Records de jonglage par joueur</h2><p class="sub">Comparaison des records (seances guidees).</p><div id="chart-bars"></div></div>
     <div class="card full"><h2>Seances faites par joueur</h2><p class="sub">Qui s'entraine le plus regulierement.</p><div id="chart-seances"></div></div>
@@ -675,8 +706,8 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
    SUPABASE_ANON_KEY : ta cle PUBLISHABLE (commence par sb_publishable_ ou eyJ)
    -> NE PAS mettre la cle secrete (sb_secret_...) */
 const SUPABASE_URL = "https://ewsncbrzzsxytazhnuzb.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_29sjcMzZZDP3pRloAEBRMg_g8RaatyL";
-const COACH_CODE = "fcn2026";
+const SUPABASE_ANON_KEY = "COLLE_ICI_TA_CLE_PUBLISHABLE";
+const COACH_CODE = "noidanais2026";
 
 /* ===== LISTE DES CODES JOUEURS AUTORISES - a remplir par le coach =====
    Chaque ligne = un enfant : {code:"...", prenom:"...", cat:"U10-U11" ou "U12-U13"}
@@ -686,12 +717,57 @@ const COACH_CODE = "fcn2026";
    - Pour DESACTIVER cette securite (codes libres) : laisse la liste vide -> CODES_AUTORISES = []
    Exemple ci-dessous, a adapter avec tes vrais codes : */
 const CODES_AUTORISES = [
-  {code:"leo01",  prenom:"Lucas",  cat:"U12-U13"},
-  {code:"noah10",   prenom:"Noah",   cat:"U10-U11"},
-  {code:"tom13",    prenom:"Tom",    cat:"U12-U13"},
-  {code:"simon01",    prenom:"Simon",    cat:"U10-U11"},
-  // Ajoute tes joueurs ici, une ligne par enfant :
-  // {code:"xxx",   prenom:"Prenom", cat:"U10-U11"},
+  {code:"mohamedayo", prenom:"Mohamed", cat:"U10-U11"},
+  {code:"maxencebre", prenom:"Maxence", cat:"U10-U11"},
+  {code:"oscarcol", prenom:"Oscar", cat:"U10-U11"},
+  {code:"marcellindes", prenom:"Marcellin", cat:"U10-U11"},
+  {code:"noegou", prenom:"Noe", cat:"U10-U11"},
+  {code:"simongra", prenom:"Simon", cat:"U10-U11"},
+  {code:"mylovanjac", prenom:"Mylovan", cat:"U10-U11"},
+  {code:"maximelam", prenom:"Maxime", cat:"U10-U11"},
+  {code:"louisnot", prenom:"Louis", cat:"U10-U11"},
+  {code:"yacinerag", prenom:"Yacine", cat:"U10-U11"},
+  {code:"amirthi", prenom:"Amir", cat:"U10-U11"},
+  {code:"tiagobau", prenom:"Tiago", cat:"U10-U11"},
+  {code:"leobon", prenom:"Leo", cat:"U10-U11"},
+  {code:"milocas", prenom:"Milo", cat:"U10-U11"},
+  {code:"kelyoche", prenom:"Kelyo", cat:"U10-U11"},
+  {code:"gabyncle", prenom:"Gabyn", cat:"U10-U11"},
+  {code:"harounelh", prenom:"Haroun", cat:"U10-U11"},
+  {code:"marouanezz", prenom:"Marouan", cat:"U10-U11"},
+  {code:"tyliangar", prenom:"Tylian", cat:"U10-U11"},
+  {code:"louisjea", prenom:"Louis", cat:"U10-U11"},
+  {code:"simonnor", prenom:"Simon", cat:"U10-U11"},
+  {code:"ilanoss", prenom:"Ilan", cat:"U10-U11"},
+  {code:"arthurver", prenom:"Arthur", cat:"U10-U11"},
+  {code:"aarondel", prenom:"Aaron", cat:"U12-U13"},
+  {code:"evanalc", prenom:"Evan", cat:"U12-U13"},
+  {code:"hugogue", prenom:"Hugo", cat:"U12-U13"},
+  {code:"jonahvig", prenom:"Jonah", cat:"U12-U13"},
+  {code:"jordangro", prenom:"Jordan", cat:"U12-U13"},
+  {code:"leopaulgra", prenom:"Leo-Paul", cat:"U12-U13"},
+  {code:"loisarn", prenom:"Lois", cat:"U12-U13"},
+  {code:"louistam", prenom:"Louis", cat:"U12-U13"},
+  {code:"lukagui", prenom:"Luka", cat:"U12-U13"},
+  {code:"maelcol", prenom:"Mael", cat:"U12-U13"},
+  {code:"naimhad", prenom:"Naim", cat:"U12-U13"},
+  {code:"neelhus", prenom:"Neel", cat:"U12-U13"},
+  {code:"aaronsan", prenom:"Aaron", cat:"U12-U13"},
+  {code:"nolanbru", prenom:"Nolan", cat:"U12-U13"},
+  {code:"ugobal", prenom:"Ugo", cat:"U12-U13"},
+  {code:"gabrielbau", prenom:"Gabriel", cat:"U12-U13"},
+  {code:"julienbou", prenom:"Julien", cat:"U12-U13"},
+  {code:"moussaelh", prenom:"Moussa", cat:"U12-U13"},
+  {code:"louisfai", prenom:"Louis", cat:"U12-U13"},
+  {code:"simonfia", prenom:"Simon", cat:"U12-U13"},
+  {code:"malofou", prenom:"Malo", cat:"U12-U13"},
+  {code:"youssoufgri", prenom:"Youssouf", cat:"U12-U13"},
+  {code:"enzojac", prenom:"Enzo", cat:"U12-U13"},
+  {code:"comelau", prenom:"Come", cat:"U12-U13"},
+  {code:"martinmer", prenom:"Martin", cat:"U12-U13"},
+  {code:"enzoter", prenom:"Enzo", cat:"U12-U13"},
+  {code:"nolanrob", prenom:"Nolan", cat:"U12-U13"},
+  {code:"ilanfau", prenom:"Ilan", cat:"U12-U13"},
 ];
 function trouverCodeAutorise(code){
   const c=(code||'').trim().toLowerCase();
@@ -794,9 +870,9 @@ function buildSummary(){
   const fiche={};ficheKeys.forEach(k=>{if(S[k])fiche[k]=S[k];});
   fiche.forces=(S.forces||[]).join(', ');fiche.faibles=(S.faibles||[]).join(', ');
   // scores des mini-jeux, remontent au coach via le JSON fiche (pas de colonne SQL a ajouter)
-  const quizOk=Object.values(S.quiz||{}).filter(Boolean).length;
+  const quizOk=(typeof quizTotalOk==='function')?quizTotalOk():Object.values(S.quiz||{}).filter(Boolean).length;const tactOk=Object.values(S.tact||{}).filter(Boolean).length;let qsjPts=0;Object.values(S.qsj||{}).forEach(v=>{qsjPts+=(v||0);});
   const vfOk=Object.values(S.vf||{}).filter(Boolean).length;
-  fiche._jeux={quiz:quizOk,vf:vfOk,simon:S.simonBest||0,reflex:S.reflexBest||0,memo:(S.memoBest!=null?S.memoBest:null),memo2:(S.memo2Best!=null?S.memo2Best:null),pendu:S.penduWins||0,xw:!!S.xwDone};
+  fiche._jeux={quiz:quizOk,vf:vfOk,simon:S.simonBest||0,reflex:S.reflexBest||0,memo:(S.memoBest!=null?S.memoBest:null),memo2:(S.memo2Best!=null?S.memo2Best:null),pendu:S.penduWins||0,xw:!!S.xwDone,tact:tactOk,qsj:qsjPts,jours:(S.jours||[]).length};
   // etat COMPLET du joueur pour synchro entre appareils (tablette <-> telephone)
   // on copie tout S sauf le code (redondant) et on horodate
   try{const full={};Object.keys(S).forEach(k=>{if(k!=='joueurCode')full[k]=S[k];});full._ts=S._full_ts||Date.now();fiche._full=full;}catch(e){}
@@ -835,7 +911,7 @@ function getPaliers(){return PALIERS_CAT[categorie()];}
 // alias pour compat : PALIERS pointe vers la categorie courante
 Object.defineProperty(window,'PALIERS',{get:function(){return getPaliers();}});
 // 16 seances datees, simples (sans chrono ni corde), centrees jonglage
-const SEANCES=[
+const SEANCES_U12=[
  {date:'2026-07-22',sem:0,t:'Seance 1',obj:'On se remet en route en douceur.',exos:[
   ['Echauffement complet','Commence par marcher 1 minute. Ensuite, fais 10 cercles avec chaque bras vers l\'avant puis l\'arriere, 10 rotations de hanches dans chaque sens, et 10 montees de genoux sur place. Termine par secouer les jambes et les bras pour bien relacher.'],
   ['Partie physique','Fais 5 montees de genoux dynamiques sur place, puis 5 talons-fesses, et 3 petits sprints de 10 metres a 70%. Repose-toi entre chaque. On reveille les jambes en douceur.','Fais 8 montees de genoux dynamiques, 8 talons-fesses, puis 4 sprints de 15 metres a bonne allure avec 20 secondes de repos entre chaque. On commence a pousser un peu plus fort.'],
@@ -917,6 +993,64 @@ const SEANCES=[
   ['Gainage et souplesse','Une planche, quelques etirements doux des jambes. Prepare bien ton corps.','Planche + laterale + etirements complets. Termine en souplesse.'],
   ['Grand concours de jongles','Derniere chance de battre tes records et d\'atteindre tous tes paliers ! Montre tous tes progres de l\'ete. Bravo pour tout ce travail, on se voit a la reprise !']]},
 ];
+// ===== 8 seances supplementaires specialement pour les U10-U11 (ludiques et adaptees) =====
+const SEANCES_EXTRA_U10=[
+ {obj:'On apprend a bien conduire son ballon.',exos:[
+  ['Echauffement','Marche 1 minute, puis fais 10 montees de genoux, 10 talons-fesses et 10 rotations des chevilles de chaque cote. Termine par 2 petites accelerations tranquilles.'],
+  ['Le slalom','Pose 4 ou 5 objets en ligne (bouteilles, chaussures, plots), espaces de 2 grands pas. Conduis ton ballon en slalom entre les objets, avec des petites touches. Fais 5 passages tranquilles, puis 5 passages un peu plus rapides.'],
+  ['Conduite a deux pieds','Refais le slalom, mais cette fois uniquement du pied gauche a l\'aller et uniquement du pied droit au retour. 4 passages de chaque. C\'est plus dur, mais c\'est comme ca qu\'on devient fort des deux pieds !'],
+  ['Petit defi chrono','Chronometre ton slalom (demande a un parent ou utilise un telephone). Fais 3 essais et note ton meilleur temps dans ta tete : tu essaieras de le battre a la prochaine seance !']]},
+ {obj:'Le mur devient ton meilleur partenaire de passes.',exos:[
+  ['Echauffement','1 minute de marche rapide, 10 cercles de bras, 10 rotations de hanches, 5 petits sauts sur place. Secoue bien les jambes.'],
+  ['Passes au mur','Place-toi a 3 grands pas d\'un mur. Fais des passes de l\'interieur du pied droit : le ballon touche le mur et revient. Controle-le puis recommence. 20 passes du droit, 20 du gauche.'],
+  ['Controle orientation','Toujours face au mur : passe, et quand le ballon revient, controle-le sur le cote (pas devant toi) puis repasse. 10 controles vers la droite, 10 vers la gauche. C\'est le geste des grands joueurs !'],
+  ['Une touche','Essaie de renvoyer le ballon contre le mur SANS le controler, en une seule touche. Compte combien tu en reussis d\'affilee. Bats ton record !']]},
+ {obj:'Precision : on vise, on marque !',exos:[
+  ['Echauffement','Marche 1 minute, 10 montees de genoux, 10 fentes avant douces (5 par jambe), 2 accelerations légères.'],
+  ['La cible','Choisis une cible (un plot, une bouteille, une zone sur un mur). Place-toi a 5 pas et essaie de la toucher avec une passe. 10 essais du pied droit, 10 du gauche. Compte tes points !'],
+  ['On recule','Meme jeu, mais recule de 3 pas de plus. C\'est plus dur ! 10 essais de chaque pied. Vise bien avec l\'interieur du pied.'],
+  ['Le penalty de la victoire','Imagine que tu tires le penalty de la finale. Pose le ballon, respire, choisis ton coin... et tire ! 5 tirs en visant un cote precis du but (ou de ta cible).']]},
+ {obj:'Des appuis rapides comme l\'eclair.',exos:[
+  ['Echauffement','1 minute de marche, 10 rotations de chevilles de chaque cote, 10 petits sauts pieds joints, 5 montees de genoux.'],
+  ['L\'echelle invisible','Imagine une echelle posee au sol (ou trace des lignes avec des objets). Avance en posant les deux pieds dans chaque case, le plus vite possible, sur la pointe des pieds. 5 passages.'],
+  ['Pas chasses','Fais 10 metres en pas chasses vers la droite, puis 10 metres vers la gauche. Reste bien sur tes appuis, genoux flechis, comme un defenseur. 3 allers-retours.'],
+  ['Jeu du miroir','Si tu as un frere, une soeur ou un copain : mettez-vous face a face. L\'un bouge (droite, gauche, saute...), l\'autre doit copier le plus vite possible. 3 fois 30 secondes chacun. Sinon, invente tes propres enchainements !']]},
+ {obj:'Les dribbles et les feintes des pros.',exos:[
+  ['Echauffement','Marche 1 minute, 10 montees de genoux, 10 talons-fesses, 2 accelerations progressives.'],
+  ['La feinte de corps','Avance doucement avec ton ballon vers un objet (plot, bouteille). Juste avant, penche ton corps a gauche puis pars vite a droite avec le ballon. Fais-le 5 fois de chaque cote. C\'est LA feinte de base de tous les grands dribbleurs !'],
+  ['Le stop-and-go','Conduis ton ballon, arrete-le d\'un coup avec la semelle, attends 1 seconde... et repars a fond ! Fais-le 8 fois. Ce changement de rythme surprend toujours le defenseur.'],
+  ['Le grand pont imaginaire','Avance vers ton objet, pousse le ballon d\'un cote et passe de l\'autre cote toi-meme, puis recupere-le derriere. 6 essais. Champion !']]},
+ {obj:'Le jonglage, mais en s\'amusant !',exos:[
+  ['Echauffement','1 minute de marche, 10 cercles de bras, 10 rotations de hanches, quelques touches de balle douces.'],
+  ['Un rebond, une touche','Laisse tomber le ballon, laisse-le rebondir une fois, puis frappe-le doucement vers le haut et rattrape-le avec les mains. Encore trop facile ? Essaie 2 touches avant de rattraper, puis 3 !'],
+  ['Jongle assis','Assieds-toi par terre, jambes tendues. Essaie de jongler avec tes pieds sans te lever ! C\'est tres dur, meme les pros s\'entrainent comme ca. Amuse-toi 5 minutes.'],
+  ['Le tour du corps','Fais tourner le ballon autour de ta taille avec les mains, puis autour de tes chevilles, puis en huit entre tes jambes. 30 secondes chaque. Le ballon doit devenir ton meilleur ami !']]},
+ {obj:'Vitesse et reaction : pars comme une fusee.',exos:[
+  ['Echauffement','Marche 1 minute, 10 montees de genoux dynamiques, 10 talons-fesses, 3 accelerations progressives.'],
+  ['Departs varies','Mets-toi assis, puis leve-toi et sprinte 10 metres. Puis pareil en partant a plat ventre, puis a genoux, puis dos a la direction de course. 2 departs de chaque position. Repose-toi bien entre chaque.'],
+  ['Le compte a rebours','Compte dans ta tete 3... 2... 1... PARS ! Sprinte 15 metres a fond. Fais-le 4 fois avec 30 secondes de repos. Travaille ton explosivite.'],
+  ['Sprint avec ballon','Maintenant pareil, mais en poussant ton ballon devant toi. 3 sprints de 15 metres. Pousse le ballon ni trop pres (tu vas le marcher) ni trop loin (tu vas le perdre).']]},
+ {obj:'Le grand parcours du champion : on combine tout !',exos:[
+  ['Echauffement','1 minute de marche rapide, 10 montees de genoux, 10 rotations de hanches, 10 petits sauts, 2 accelerations.'],
+  ['Construis ton parcours','Invente un parcours avec ce que tu as : un slalom, une zone de passes au mur (ou de jonglage), un sprint, et un tir sur cible a la fin. Installe-le bien.'],
+  ['Le parcours chrono','Fais ton parcours en entier, chronometre-toi. Repose-toi 1 minute et recommence. 4 passages : essaie d\'ameliorer ton temps a chaque fois !'],
+  ['La finale','Dernier passage : imagine que tout le club te regarde. Concentre-toi, respire... et fais ton meilleur parcours ! Termine par ta celebration de but preferee.']]}];
+
+// ===== Planning U10-U11 : 24 seances du 6 juillet au 15 aout (4 par semaine) =====
+const DATES_U10=['2026-07-06','2026-07-08','2026-07-10','2026-07-11','2026-07-13','2026-07-15','2026-07-17','2026-07-18','2026-07-20','2026-07-22','2026-07-24','2026-07-25','2026-07-27','2026-07-29','2026-07-31','2026-08-01','2026-08-03','2026-08-05','2026-08-07','2026-08-08','2026-08-10','2026-08-12','2026-08-14','2026-08-15'];
+const SEM_U10=[0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,3,3,3,3];
+const SEANCES_U10=(function(){
+  const ordre=[0,1,2,'N0',3,4,5,'N1',6,7,'N2','N3',8,9,10,'N4',11,12,13,'N5',14,15,'N6','N7'];
+  const out=[];
+  ordre.forEach((k,i)=>{
+    const src=(typeof k==='string')?SEANCES_EXTRA_U10[parseInt(k.slice(1))]:SEANCES_U12[k];
+    out.push({date:DATES_U10[i],sem:SEM_U10[i],t:'Seance '+(i+1),obj:src.obj,exos:src.exos});
+  });
+  return out;
+})();
+// SEANCES pointe automatiquement vers le planning de la categorie du joueur
+Object.defineProperty(window,'SEANCES',{get:function(){return (typeof categorie==='function'&&categorie()==='U10-U11')?SEANCES_U10:SEANCES_U12;}});
+
 const WEEKS=SEANCES;
 const JLABEL=['Seance 1','Seance 2','Seance 3','Seance 4','Seance 5','Seance 6','Seance 7'];
 const WORDS=['CONTROLE','PRESSING','DRIBBLE','VOLEE','CORNER','ARBITRE','TACLE','PISTON','LIBERO','PIVOT'];
@@ -930,7 +1064,72 @@ const MEMO2_ICONS=['\uD83C\uDDEB\uD83C\uDDF7','\uD83C\uDDE7\uD83C\uDDF7','\uD83C
 const VF=[['En match pro, chaque equipe peut faire jusqu\'a 5 remplacements.',true],['Un match ne peut pas continuer si une equipe a moins de 7 joueurs.',true],['On peut etre hors-jeu directement sur un corner.',false],['La Coupe du Monde 2026 se joue aux USA, Canada et Mexique.',true],['Un joueur remplace peut revenir en jeu plus tard (en pro).',false],['Le gardien peut prendre le ballon a la main sur une passe du pied d\'un coequipier.',false],['Ousmane Dembele a gagne le Ballon d\'Or 2025.',true],['Le Real Madrid a remporte la Ligue des Champions 2025.',false],['Un penalty se tire a 11 metres du but.',true],['On peut marquer contre son camp sur une rentree de touche directe.',false]];
 const INTRUS=[[['Mbappe','Dembele','Vinicius','Modric'],3,'Modric est un milieu ; les 3 autres sont des attaquants/ailiers.'],[['Maracana','Bernabeu','San Siro','Wembley','Wimbledon'],4,'Wimbledon est un tournoi de tennis, pas un stade de foot.'],[['Real Madrid','Liverpool','Bayern','Naples'],3,'Naples (Napoli) n\'a jamais gagne la Ligue des Champions.'],[['Maignan','Donnarumma','Courtois','Bellingham'],3,'Bellingham est un milieu, les 3 autres sont gardiens.'],[['Ballon d\'Or','Soulier d\'Or','The Best','Maillot Jaune'],3,'Le Maillot Jaune recompense le cyclisme.'],[['France 1998','Espagne 2010','Bresil 2002','Pays-Bas 2010'],3,'Les Pays-Bas ont perdu la finale 2010, ils ne l\'ont pas gagnee.'],[['Serie A','Bundesliga','La Liga','Roland-Garros'],3,'Roland-Garros est un tournoi de tennis.']];
 const PENDU_MOTS=['ATTAQUANT','GARDIEN','PENALTY','DRIBBLE','CAPITAINE','SUPPORTER','VESTIAIRE','ENTRAINEUR'];
-const QUIZ=[['Dans quel club joue principalement Kylian Mbappe depuis 2024 ?',['PSG','Real Madrid','Liverpool'],1],['De quel pays est la star Erling Haaland ?',['Suede','Norvege','Danemark'],1],['Dans quel club evolue Erling Haaland ?',['Manchester City','Chelsea','Arsenal'],0],['Le stade Santiago Bernabeu est le stade de quel club ?',['FC Barcelone','Real Madrid','Atletico Madrid'],1],['Dans quelle ville se trouve le stade Camp Nou ?',['Madrid','Barcelone','Valence'],1],['Old Trafford est le stade de quel club anglais ?',['Liverpool','Manchester United','Chelsea'],1],["L'Allianz Arena est le stade de quel club ?",['Borussia Dortmund','Bayern Munich','Leipzig'],1],['Dans quel pays se trouve le stade San Siro ?',['Espagne','Italie','Allemagne'],1],['Le stade Velodrome est le stade de quel club francais ?',['OL','OM','PSG'],1],["Dans quelle ville joue l'Olympique Lyonnais ?",['Lyon','Lille','Lens'],0],['De quel pays vient le joueur Vinicius Junior ?',['Bresil','Argentine','Portugal'],0],['Le Parc des Princes est le stade de quel club ?',['PSG','OM','Monaco'],0],['Dans quel championnat joue le Bayern Munich ?',['Liga','Bundesliga','Serie A'],1],['De quel pays est la star Lamine Yamal ?',['Espagne','France','Maroc'],0],['Dans quel club joue Jude Bellingham ?',['Manchester City','Real Madrid','Liverpool'],1],['Anfield est le stade de quel club anglais ?',['Everton','Liverpool','Manchester United'],1],['Dans quel pays joue le club de la Juventus ?',['Italie','Espagne','Portugal'],0],['De quel pays est le joueur Achraf Hakimi ?',['Algerie','Maroc','Tunisie'],1],['Dans quel club joue Achraf Hakimi ?',['PSG','Real Madrid','Inter Milan'],0],['Le stade Emirates Stadium est le stade de quel club ?',['Tottenham','Arsenal','Chelsea'],1],['Dans quelle ville se trouve le club de Naples (Napoli) ?',['Rome','Naples','Turin'],1],['De quel pays est le gardien Thibaut Courtois ?',['Belgique','Pays-Bas','France'],0],['Le club du FC Porto joue dans quel pays ?',['Espagne','Portugal','Bresil'],1],['Dans quel club joue Ousmane Dembele en 2025 ?',['Barcelone','PSG','Bayern'],1],['La Bombonera est le stade mythique de quel club ?',['River Plate','Boca Juniors','Flamengo'],1]];
+const QUIZ_NIVEAUX={
+facile:[
+['Combien de joueurs de chaque equipe sont sur le terrain ?',['9','11','13'],1],
+['Quelle partie du corps est interdite pour jouer le ballon (sauf le gardien) ?',['La tete','Les mains','Les genoux'],1],
+['Quelle est la couleur du carton qui expulse un joueur ?',['Jaune','Rouge','Vert'],1],
+['De quel pays est Kylian Mbappe ?',['Belgique','France','Suisse'],1],
+['Combien y a-t-il de mi-temps dans un match ?',['1','2','3'],1],
+['Le PSG est le club de quelle ville ?',['Lyon','Paris','Lille'],1],
+['De quel pays est Lionel Messi ?',['Bresil','Argentine','Espagne'],1],
+['De quel pays est Cristiano Ronaldo ?',['Espagne','Portugal','Italie'],1],
+['Quand le ballon sort sur le cote, on fait une... ?',['Touche','Corner','Penalty'],0],
+['Quelle est la couleur du carton d\'avertissement ?',['Jaune','Rouge','Bleu'],0],
+['Comment s\'appelle l\'equipe de France de foot ?',['Les Rouges','Les Bleus','Les Verts'],1],
+['Combien de points gagne une equipe qui remporte un match ?',['1','2','3'],2],
+['Dans quelle ville joue l\'OM ?',['Monaco','Marseille','Montpellier'],1],
+['Ou le gardien peut-il prendre le ballon a la main ?',['Partout','Dans sa surface','Nulle part'],1],
+['Quel pays a gagne le plus de Coupes du monde ?',['Allemagne','Bresil','France'],1],
+['Un match de foot commence par un... ?',['Coup d\'envoi','Corner','Coup franc'],0],
+['Comment s\'appelle le joueur qui garde le but ?',['Le defenseur','Le gardien','L\'arbitre'],1],
+['Que se passe-t-il si le ballon sort derriere le but, touche par un defenseur ?',['Touche','Corner','Six metres'],1],
+],
+moyen:[
+['Dans quel club joue principalement Kylian Mbappe depuis 2024 ?',['PSG','Real Madrid','Liverpool'],1],
+['De quel pays est la star Erling Haaland ?',['Suede','Norvege','Danemark'],1],
+['Dans quel club evolue Erling Haaland ?',['Manchester City','Chelsea','Arsenal'],0],
+['Le stade Santiago Bernabeu est le stade de quel club ?',['FC Barcelone','Real Madrid','Atletico Madrid'],1],
+['Dans quelle ville se trouve le stade Camp Nou ?',['Madrid','Barcelone','Valence'],1],
+['Old Trafford est le stade de quel club anglais ?',['Liverpool','Manchester United','Chelsea'],1],
+["L'Allianz Arena est le stade de quel club ?",['Borussia Dortmund','Bayern Munich','Leipzig'],1],
+['Dans quel pays se trouve le stade San Siro ?',['Espagne','Italie','Allemagne'],1],
+['Le stade Velodrome est le stade de quel club francais ?',['OL','OM','PSG'],1],
+["Dans quelle ville joue l'Olympique Lyonnais ?",['Lyon','Lille','Lens'],0],
+['De quel pays vient le joueur Vinicius Junior ?',['Bresil','Argentine','Portugal'],0],
+['Le Parc des Princes est le stade de quel club ?',['PSG','OM','Monaco'],0],
+['Dans quel championnat joue le Bayern Munich ?',['Liga','Bundesliga','Serie A'],1],
+['De quel pays est la star Lamine Yamal ?',['Espagne','France','Maroc'],0],
+['Dans quel club joue Jude Bellingham ?',['Manchester City','Real Madrid','Liverpool'],1],
+['Anfield est le stade de quel club anglais ?',['Everton','Liverpool','Manchester United'],1],
+['Dans quel pays joue le club de la Juventus ?',['Italie','Espagne','Portugal'],0],
+['De quel pays est le joueur Achraf Hakimi ?',['Algerie','Maroc','Tunisie'],1],
+['Dans quel club joue Achraf Hakimi ?',['PSG','Real Madrid','Inter Milan'],0],
+['Le stade Emirates Stadium est le stade de quel club ?',['Tottenham','Arsenal','Chelsea'],1],
+['Dans quelle ville se trouve le club de Naples (Napoli) ?',['Rome','Naples','Turin'],1],
+['De quel pays est le gardien Thibaut Courtois ?',['Belgique','Pays-Bas','France'],0],
+['Le club du FC Porto joue dans quel pays ?',['Espagne','Portugal','Bresil'],1],
+['Dans quel club joue Ousmane Dembele en 2025 ?',['Barcelone','PSG','Bayern'],1],
+['La Bombonera est le stade mythique de quel club ?',['River Plate','Boca Juniors','Flamengo'],1],
+],
+difficile:[
+['Quel pays a remporte la Coupe du monde 2022 ?',['France','Argentine','Bresil'],1],
+['Quel joueur a remporte le plus de Ballons d\'Or ?',['Cristiano Ronaldo','Lionel Messi','Michel Platini'],1],
+['En quelle annee la France a-t-elle gagne sa premiere Coupe du monde ?',['1998','2006','2018'],0],
+['Quel club a gagne le plus de Ligues des champions ?',['AC Milan','Real Madrid','Liverpool'],1],
+['Quel est le surnom de l\'equipe du Bresil ?',['La Roja','La Selecao','La Squadra'],1],
+['Quel pays a gagne l\'Euro 2024 ?',['Angleterre','Espagne','France'],1],
+['Combien de Coupes du monde a gagne Pele ?',['2','3','4'],1],
+['Qui etait le gardien et capitaine de la France championne du monde 2018 ?',['Steve Mandanda','Hugo Lloris','Mike Maignan'],1],
+['Le stade de Wembley se trouve dans quelle ville ?',['Manchester','Londres','Liverpool'],1],
+['Quels pays organisent la Coupe du monde 2026 ?',['USA, Canada et Mexique','Espagne et Portugal','Qatar'],0],
+['De quel pays etait Diego Maradona ?',['Bresil','Argentine','Uruguay'],1],
+['La celebre "Main de Dieu" est associee a quel joueur ?',['Pele','Maradona','Zidane'],1],
+['Quel club anglais est surnomme les "Reds" ?',['Manchester United','Liverpool','Arsenal'],1],
+['Que veut dire faire un "coup du chapeau" (hat-trick) ?',['3 passes decisives','3 buts dans un match','3 arrets'],1],
+['Combien de buts a marque Zidane en finale de la Coupe du monde 1998 ?',['1','2','3'],1],
+['Le Ballon d\'Or recompense... ?',['Le meilleur buteur','Le meilleur joueur de l\'annee','Le meilleur gardien'],1],
+]};
 
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('v-'+b.dataset.go).classList.add('active');window.scrollTo(0,0);if(b.dataset.go==='stats')runIA();if(b.dataset.go==='coach')updateSyncPill();if(b.dataset.go==='jongle')renderFree();});
 function daysLeft(){const d=Math.ceil((new Date('2026-08-18')-new Date())/86400000);return d>0?d:0;}
@@ -1019,7 +1218,7 @@ const SMONTHS=['jan','fev','mar','avr','mai','juin','juil','aout','sep','oct','n
 const SEANCE_DAYS=[1,2,4,5];
 function renderPlanning(){
   const box=document.getElementById('planning');if(!box)return;S.planDone=S.planDone||{};S.planSupp=S.planSupp||{};
-  const start=new Date('2026-07-22'),end=new Date('2026-08-18');
+  const start=new Date((typeof categorie==='function'&&categorie()==='U10-U11')?'2026-07-06':'2026-07-22'),end=new Date('2026-08-18');
   let weeks=[];let curWeek=[];let cur=new Date(start);
   while(cur<=end){curWeek.push(new Date(cur));if(cur.getDay()===0){weeks.push(curWeek);curWeek=[];}cur.setDate(cur.getDate()+1);}
   if(curWeek.length)weeks.push(curWeek);
@@ -1140,9 +1339,66 @@ function simonNext(){simonLevel++;document.getElementById('simon-level').textCon
 function simonShow(){simonShowing=true;const d=document.getElementById('simon-display');let i=0;d.textContent='';const iv=setInterval(()=>{if(i>=simonSeq.length){clearInterval(iv);d.textContent='A toi !';simonShowing=false;return;}d.textContent=simonSeq[i];setTimeout(()=>{if(simonShowing)d.textContent='.';},400);i++;},650);}
 function buildSimon(){const pad=document.getElementById('simon-pad');pad.innerHTML='';document.getElementById('simon-best').textContent=S.simonBest||'-';for(let n=0;n<10;n++){const b=document.createElement('button');b.textContent=n;b.style.cssText='aspect-ratio:1;border:2px solid var(--blue);background:var(--blue-l);border-radius:10px;font-family:\'Anton\';font-size:18px;color:var(--blue);cursor:pointer';b.onclick=()=>{if(simonShowing||simonSeq.length===0)return;if(n===simonSeq[simonStep]){simonStep++;b.style.background='var(--yellow)';setTimeout(()=>b.style.background='var(--blue-l)',150);if(simonStep===simonSeq.length){if(simonLevel-1>=(S.simonBest||0)){S.simonBest=simonLevel;save();}document.getElementById('simon-display').textContent='Bravo !';setTimeout(simonNext,800);}}else{document.getElementById('simon-display').textContent='Rate. Niveau '+(simonLevel-1);if((simonLevel-1)>(S.simonBest||0)){S.simonBest=simonLevel-1;save();}document.getElementById('simon-best').textContent=S.simonBest||'-';simonSeq=[];if(navigator.vibrate)navigator.vibrate(150);}};pad.appendChild(b);}}
 
-function buildQuiz(){const c=document.getElementById('quiz-list');c.innerHTML='';S.quiz=S.quiz||{};document.getElementById('quiz-total').textContent=QUIZ.length;function upd(){let n=0;Object.values(S.quiz).forEach(v=>{if(v)n++;});document.getElementById('quiz-score').textContent=n;}QUIZ.forEach((q,i)=>{const div=document.createElement('div');div.className='q';div.innerHTML='<p>'+(i+1)+'. '+q[0]+'</p>';const opts=document.createElement('div');opts.className='opts';q[1].forEach((opt,oi)=>{const b=document.createElement('button');b.textContent=opt;b.onclick=()=>{const correct=oi===q[2];opts.querySelectorAll('button').forEach(x=>x.className='');b.classList.add(correct?'ok':'no');if(!correct)opts.children[q[2]].classList.add('ok');S.quiz[i]=correct;save();upd();};opts.appendChild(b);});div.appendChild(opts);c.appendChild(div);});upd();}
+const TACTIQUE=[
+{q:"Tu es defenseur, l'attaquant arrive seul vers toi en dribblant.",o:["Je me jette tout de suite dans le tacle","Je recule en le ralentissant et j'attends le bon moment","Je le laisse passer"],ok:1,e:"En reculant tu le ralentis, tes coequipiers reviennent t'aider, et tu interviens au bon moment."},
+{q:"Tu as le ballon, un adversaire te presse fort, un coequipier est tout seul a cote.",o:["Je tente le dribble","Je passe au coequipier demarque","Je degage loin devant"],ok:1,e:"Le foot est un jeu collectif : la passe au joueur libre va plus vite que n'importe quel dribble."},
+{q:"Contre-attaque a 2 contre 1 : toi et un coequipier face a un seul defenseur.",o:["Je tire de tres loin","Je fixe le defenseur puis je donne a mon coequipier","Je ralentis pour attendre les autres"],ok:1,e:"En allant vers le defenseur tu l'obliges a s'occuper de toi : ton coequipier se retrouve tout seul."},
+{q:"Tu viens de perdre le ballon en attaque.",o:["Je m'arrete, decu","Je presse tout de suite pour le recuperer","J'attends que la defense s'en occupe"],ok:1,e:"Juste apres la perte, l'adversaire n'est pas encore organise : c'est le meilleur moment pour recuperer le ballon."},
+{q:"Corner pour ton equipe, tu es dans la surface adverse.",o:["Je reste immobile a ma place","Je bouge pour me demarquer au moment du tir","Je sors de la surface"],ok:1,e:"Un joueur qui bouge est tres difficile a marquer : demarque-toi au bon moment pour etre libre."},
+{q:"Le defenseur adverse a le ballon, tu es attaquant.",o:["Je redescends me reposer","Je le gene en cadrant sa relance","Je reste dans mon coin"],ok:1,e:"En genant la relance tu peux provoquer une erreur tout pres du but adverse : c'est le premier travail de l'attaquant."},
+{q:"Tu es le dernier defenseur, l'attaquant tente de te dribbler pres de ta surface.",o:["Je tacle meme si c'est risque","Je reste debout et je l'accompagne vers l'exterieur","Je tire son maillot"],ok:1,e:"En restant debout tu ne peux pas etre elimine. L'emmener vers l'exterieur reduit l'angle de tir."},
+{q:"Ton coequipier rate une passe importante et se decourage.",o:["Je lui crie dessus","Je l'encourage : tout le monde rate parfois","Je fais comme si de rien n'etait"],ok:1,e:"Un joueur encourage rejoue mieux tout de suite. Une equipe qui s'encourage est plus forte."},
+{q:"Tu es milieu, ta defense a le ballon et cherche une solution.",o:["Je me cache derriere un adversaire","Je me demarque pour offrir une solution de passe","J'attends tout devant"],ok:1,e:"Sans solution de passe, ta defense est obligee de degager. Bouge pour aider tes defenseurs a jouer."},
+{q:"Touche rapide possible pres de la surface adverse, un coequipier est libre.",o:["Je joue vite pendant que la defense est mal placee","J'attends toujours que tout le monde soit place","Je la joue en arriere systematiquement"],ok:0,e:"Jouer vite une touche surprend la defense avant qu'elle ne s'organise. La vitesse est une arme."},
+{q:"Il reste 2 minutes, ton equipe mene 1 a 0.",o:["Je tente des dribbles risques devant ma surface","Je joue simple et je garde le ballon loin de mon but","Je degage n'importe ou a chaque ballon"],ok:1,e:"En fin de match, garder le ballon calmement et jouer simple protege ton avance : pas de risque inutile."},
+{q:"Ton adversaire direct est beaucoup plus rapide que toi.",o:["J'anticipe et je prends de l'avance dans mon placement","Je le regarde partir en esperant qu'il rate","Je le retiens par le maillot"],ok:0,e:"On ne gagne pas un duel de vitesse perdu d'avance : on le gagne AVANT, avec un bon placement et de l'anticipation."}];
+function buildTact(){const c=document.getElementById('tact-list');if(!c)return;c.innerHTML='';S.tact=S.tact||{};document.getElementById('tact-total').textContent=TACTIQUE.length;function upd(){let n=0;Object.values(S.tact).forEach(v=>{if(v)n++;});document.getElementById('tact-score').textContent=n;}
+TACTIQUE.forEach((t,i)=>{const div=document.createElement('div');div.className='q';div.innerHTML='<p>'+(i+1)+'. '+t.q+'</p>';const opts=document.createElement('div');opts.className='opts';const expl=document.createElement('p');expl.style.cssText='font-size:12.5px;color:var(--grey);margin-top:6px;display:none;font-style:italic';expl.textContent=t.e;t.o.forEach((opt,oi)=>{const b=document.createElement('button');b.textContent=opt;b.onclick=()=>{const correct=oi===t.ok;opts.querySelectorAll('button').forEach(x=>x.className='');b.classList.add(correct?'ok':'no');if(!correct)opts.children[t.ok].classList.add('ok');expl.style.display='block';S.tact[i]=correct;save();upd();};opts.appendChild(b);});div.appendChild(opts);div.appendChild(expl);c.appendChild(div);});upd();}
 
-const BADGES=[['*','Petit prodige','Note ton 1er jongle',()=>S.record>0],['*','En feu','Atteins 30 jongles',()=>S.record>=30],['*','Fusee','Atteins 60 jongles',()=>S.record>=60],['*','Roi du jonglage','100 jongles bon pied',()=>bestByType('B')>=100],['*','Sniper','Marque 5 penos',()=>S.pen.buts>=5],['*','Tueur de gardien','Serie de 5 penos',()=>S.pen.serie>=5],['*','Cerveau','Finis les mots croises',()=>S.xwDone],['*','Memoire d\'or','Memory en moins de 20 coups',()=>(S.memoBest&&S.memoBest<=20)],['*','Tour du monde','Finis le memory nations',()=>(S.memo2Best!=null)],['*','Bete de travail','Fais 15 exercices',()=>countSeances()>=15],['*','Legende','Debloque 8 badges',()=>countBadges()>=8]];
+const QUISUISJE=[
+{ind:["Je suis francais","J'ai gagne la Coupe du monde 2018 a 19 ans","Je joue au Real Madrid depuis 2024"],rep:"Kylian Mbappe",opts:["Antoine Griezmann","Kylian Mbappe","Olivier Giroud","Ousmane Dembele"]},
+{ind:["Je suis argentin","J'ai gagne 8 Ballons d'Or","J'ai gagne la Coupe du monde 2022"],rep:"Lionel Messi",opts:["Diego Maradona","Angel Di Maria","Lionel Messi","Sergio Aguero"]},
+{ind:["Je suis portugais","Mon numero celebre est le 7","Mon cri celebre est Siuuu"],rep:"Cristiano Ronaldo",opts:["Cristiano Ronaldo","Luis Figo","Joao Felix","Pepe"]},
+{ind:["Je suis norvegien","Je suis tres grand et tres puissant","Je marque enormement avec Manchester City"],rep:"Erling Haaland",opts:["Martin Odegaard","Erling Haaland","Zlatan Ibrahimovic","Victor Osimhen"]},
+{ind:["Je suis un ancien joueur francais","J'ai marque 2 buts en finale de Coupe du monde 1998","J'ai ensuite entraine le Real Madrid"],rep:"Zinedine Zidane",opts:["Thierry Henry","Didier Deschamps","Zinedine Zidane","Michel Platini"]},
+{ind:["Je suis bresilien","Je suis connu pour mes dribbles spectaculaires","J'ai joue au Barca puis au PSG"],rep:"Neymar",opts:["Neymar","Ronaldinho","Vinicius Junior","Rodrygo"]},
+{ind:["Je suis francais","J'ai longtemps joue a l'Atletico Madrid","Mon surnom est Grizou"],rep:"Antoine Griezmann",opts:["Paul Pogba","Antoine Griezmann","Karim Benzema","Kingsley Coman"]},
+{ind:["Je suis espagnol","Je suis l'un des plus jeunes cracks du foot mondial","Je joue ailier au FC Barcelone"],rep:"Lamine Yamal",opts:["Pedri","Gavi","Lamine Yamal","Nico Williams"]},
+{ind:["Je suis italien","Je suis gardien de but","J'ai ete le heros de l'Euro 2021 avec l'Italie"],rep:"Gianluigi Donnarumma",opts:["Gianluigi Buffon","Gianluigi Donnarumma","Mike Maignan","Thibaut Courtois"]},
+{ind:["Je suis bresilien","Je suis un ailier tres rapide","Je joue au Real Madrid"],rep:"Vinicius Junior",opts:["Raphinha","Rodrygo","Vinicius Junior","Endrick"]}];
+let qsjIdx=0,qsjIndicesVus=1;
+function buildQSJ(){S.qsj=S.qsj||{};qsjIdx=0;qsjIndicesVus=1;
+  // reprendre au premier joueur non encore devine
+  while(qsjIdx<QUISUISJE.length&&S.qsj[qsjIdx]!=null)qsjIdx++;
+  renderQSJ();}
+function qsjScoreUpd(){let n=0;Object.values(S.qsj||{}).forEach(v=>{n+=(v||0);});const e=document.getElementById('qsj-score');if(e)e.textContent=n;const m=document.getElementById('qsj-max');if(m)m.textContent=QUISUISJE.length*3;}
+function renderQSJ(){const z=document.getElementById('qsj-zone');if(!z)return;qsjScoreUpd();
+  if(qsjIdx>=QUISUISJE.length){z.innerHTML='<p style="text-align:center;font-weight:700;color:var(--blue);padding:14px 0">Bravo, tu as devine tous les joueurs mysteres !<br><button class="btn sm" style="margin-top:10px" onclick="qsjRejouer()">Rejouer depuis le debut</button></p>';return;}
+  const j=QUISUISJE[qsjIdx];let h='<p style="font-size:13px;color:var(--grey);margin-bottom:6px">Joueur mystere '+(qsjIdx+1)+' / '+QUISUISJE.length+'</p>';
+  for(let i=0;i<qsjIndicesVus;i++){h+='<p style="font-size:14px;font-weight:600;margin:4px 0">Indice '+(i+1)+' : '+j.ind[i]+'</p>';}
+  h+='<div class="opts" id="qsj-opts" style="margin-top:10px"></div>';
+  if(qsjIndicesVus<j.ind.length){h+='<button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="qsjIndice()">Indice suivant (je gagnerai moins de points)</button>';}
+  h+='<p style="font-size:12.5px;color:var(--grey);text-align:center;margin-top:6px">Bonne reponse maintenant = <b>'+(4-qsjIndicesVus)+' point'+((4-qsjIndicesVus)>1?'s':'')+'</b></p>';
+  z.innerHTML=h;
+  const opts=document.getElementById('qsj-opts');
+  j.opts.forEach(opt=>{const b=document.createElement('button');b.textContent=opt;b.onclick=()=>{const correct=(opt===j.rep);
+    if(correct){S.qsj[qsjIdx]=4-qsjIndicesVus;}else{S.qsj[qsjIdx]=0;}
+    save();
+    opts.querySelectorAll('button').forEach(x=>{x.className='';x.disabled=true;if(x.textContent===j.rep)x.classList.add('ok');});
+    if(!correct)b.classList.add('no');
+    setTimeout(()=>{qsjIdx++;qsjIndicesVus=1;renderQSJ();},1400);
+  };opts.appendChild(b);});}
+function qsjIndice(){qsjIndicesVus++;renderQSJ();}
+function qsjRejouer(){S.qsj={};persist();qsjIdx=0;qsjIndicesVus=1;renderQSJ();}
+
+let quizNivCourant='facile';
+function quizTotalOk(){let n=0;const q=S.quizN||{};['facile','moyen','difficile'].forEach(nv=>{Object.values(q[nv]||{}).forEach(v=>{if(v)n++;});});return n;}
+function quizNbTotal(){return QUIZ_NIVEAUX.facile.length+QUIZ_NIVEAUX.moyen.length+QUIZ_NIVEAUX.difficile.length;}
+function quizNiveau(nv){quizNivCourant=nv;['facile','moyen','difficile'].forEach(x=>{const b=document.getElementById('qz-'+x);if(b)b.className='btn sm'+(x===nv?'':' ghost');});buildQuiz();}
+function buildQuiz(){const c=document.getElementById('quiz-list');if(!c)return;c.innerHTML='';S.quizN=S.quizN||{};S.quizN[quizNivCourant]=S.quizN[quizNivCourant]||{};const LISTE=QUIZ_NIVEAUX[quizNivCourant];const rep=S.quizN[quizNivCourant];document.getElementById('quiz-total').textContent=LISTE.length;document.getElementById('quiz-total-tot').textContent=quizNbTotal();function upd(){let n=0;Object.values(rep).forEach(v=>{if(v)n++;});document.getElementById('quiz-score').textContent=n;document.getElementById('quiz-score-tot').textContent=quizTotalOk();}
+LISTE.forEach((q,i)=>{const div=document.createElement('div');div.className='q';div.innerHTML='<p>'+(i+1)+'. '+q[0]+'</p>';const opts=document.createElement('div');opts.className='opts';q[1].forEach((opt,oi)=>{const b=document.createElement('button');b.textContent=opt;b.onclick=()=>{const correct=oi===q[2];opts.querySelectorAll('button').forEach(x=>x.className='');b.classList.add(correct?'ok':'no');if(!correct)opts.children[q[2]].classList.add('ok');rep[i]=correct;save();upd();};opts.appendChild(b);});div.appendChild(opts);c.appendChild(div);});upd();}
+
+const BADGES=[['*','Petit prodige','Note ton 1er jongle',()=>S.record>0],['*','En feu','Atteins 30 jongles',()=>S.record>=30],['*','Fusee','Atteins 60 jongles',()=>S.record>=60],['*','Roi du jonglage','Objectif final bon pied',()=>bestByType('B')>=getPaliers()[3].bon],['*','Trois surfaces','Tous les objectifs finaux',()=>bestByType('B')>=getPaliers()[3].bon&&bestByType('M')>=getPaliers()[3].mau&&bestByType('T')>=getPaliers()[3].tet],['*','Sniper','Marque 5 penos',()=>S.pen.buts>=5],['*','Tueur de gardien','Serie de 5 penos',()=>S.pen.serie>=5],['*','Cerveau','Finis les mots croises',()=>S.xwDone],['*','Cerveau tactique','10 bonnes decisions au jeu tactique',()=>Object.values(S.tact||{}).filter(Boolean).length>=10],['*','Detective','15 points au Qui suis-je',()=>{let n=0;Object.values(S.qsj||{}).forEach(v=>{n+=(v||0);});return n>=15;}],['*','Quiz master','30 bonnes reponses au quiz',()=>(typeof quizTotalOk==='function'?quizTotalOk():0)>=30],['*','Memoire d\'or','Memory en moins de 20 coups',()=>(S.memoBest&&S.memoBest<=20)],['*','Tour du monde','Finis le memory nations',()=>(S.memo2Best!=null)],['*','Assidu','Ouvre ton cahier 7 jours',()=>(S.jours||[]).length>=7],['*','Fidele au poste','Ouvre ton cahier 14 jours',()=>(S.jours||[]).length>=14],['*','Bete de travail','Fais 15 exercices',()=>countSeances()>=15],['*','Marathonien','Fais toutes les seances',()=>countSeancesFaites()>=SEANCES.length],['*','Legende','Debloque 10 badges',()=>countBadges()>=10]];
 function countSeances(){return Object.values(S.exoDone||{}).filter(Boolean).length;}
 function countSeancesFaites(){let n=0;Object.values(S.planDone||{}).forEach(v=>{if(v)n++;});return n;}
 function countDefis(){let n=0;Object.values(S.defis||{}).forEach(wk=>Object.values(wk).forEach(v=>{if(v!==''&&v!==undefined&&!isNaN(parseFloat(v)))n++;}));return n;}
@@ -1164,8 +1420,36 @@ function jongleSeries(){const s=[];S.jongle=S.jongle||{};
 function renderJongleStats(){const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('js-bon',bestByType('B'));set('js-mauvais',bestByType('M'));set('js-tete',bestByType('T'));const ser=jongleSeries();const tot=ser.reduce((a,s)=>a+s.bon+s.mau+s.tet,0);const bests=ser.map(s=>s.best);const moy=ser.length?Math.round(bests.reduce((a,b)=>a+b,0)/ser.length):0;set('js-total',tot);set('js-moy',moy);let prog='-';if(ser.length>=2){const d=ser[ser.length-1].best-ser[0].best;prog=(d>=0?'+':'')+d;}set('js-prog',prog);}
 function renderChart(){const box=document.getElementById('chart');if(!box)return;const ser=jongleSeries();if(!ser.length){box.innerHTML='<p style="color:var(--grey);font-size:13px;text-align:center;padding:20px">Remplis tes jonglages dans Seances pour voir ta courbe.</p>';return;}const W=Math.max(320,ser.length*60+40),H=200,pL=34,pB=28,pT=12,pR=12;const maxV=Math.max(10,...ser.map(s=>Math.max(s.bon,s.mau,s.tet)));const x=i=>pL+(ser.length===1?(W-pL-pR)/2:i*(W-pL-pR)/(ser.length-1));const y=v=>pT+(H-pT-pB)*(1-v/maxV);function ln(k,col){if(ser.length===1)return '<circle cx="'+x(0)+'" cy="'+y(ser[0][k])+'" r="4" fill="'+col+'"/>';let d='M'+x(0)+' '+y(ser[0][k]);for(let i=1;i<ser.length;i++)d+=' L'+x(i)+' '+y(ser[i][k]);let pts=ser.map((s,i)=>'<circle cx="'+x(i)+'" cy="'+y(s[k])+'" r="3" fill="'+col+'"/>').join('');return '<path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round"/>'+pts;}let grid='';for(let k=0;k<=4;k++){const gy=pT+(H-pT-pB)*k/4,val=Math.round(maxV*(1-k/4));grid+='<line x1="'+pL+'" y1="'+gy+'" x2="'+(W-pR)+'" y2="'+gy+'" stroke="#E3E6EF"/><text x="'+(pL-6)+'" y="'+(gy+4)+'" font-size="9" fill="#9CA3AF" text-anchor="end">'+val+'</text>';}let lab=ser.map((s,i)=>'<text x="'+x(i)+'" y="'+(H-pB+16)+'" font-size="8" fill="#7A86A1" text-anchor="middle">'+s.label+'</text>').join('');box.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%;font-family:Outfit">'+grid+lab+ln('best','#16A34A')+ln('bon','#1D388F')+ln('mau','#E2000B')+ln('tet','#E6A800')+'</svg>';}
 function progress(a,b,c,ba,bb,bc){const bon=bestByType('B'),mau=bestByType('M'),tet=bestByType('T');const pal=(typeof getPaliers==='function')?getPaliers():PALIERS_CAT['U12-U13'];const fin=pal[3];const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set(a,bon);set(b,mau);set(c,tet);set(a+'-max',fin.bon);set(b+'-max',fin.mau);set(c+'-max',fin.tet);const w=(id,v)=>{const e=document.getElementById(id);if(e)e.style.width=v+'%';};w(ba,Math.min(100,bon/fin.bon*100));w(bb,Math.min(100,mau/fin.mau*100));w(bc,Math.min(100,tet/fin.tet*100));}
+const DEFIS_CAT={
+'U10-U11':[
+"Prepare ton ballon et tes chaussures : ton cahier demarre le 6 juillet !",
+"Cette semaine : note ton jonglage 3 jours differents. La regularite avant tout !",
+"Cette semaine : le slalom ! Ameliore ton temps de conduite de balle.",
+"Cette semaine : concentre-toi sur ton MAUVAIS pied. Essaie de battre ton record !",
+"Cette semaine : objectif TETE ! Fais quelques touches de plus chaque jour.",
+"Cette semaine : les passes ! Trouve un mur et enchaine les controles parfaits.",
+"Derniere ligne droite : vise ton palier final avant la reprise du 18 aout !",
+"C'est la reprise ! Bravo pour ton ete de champion, on se retrouve au stade."],
+'U12-U13':[
+"Prepare ton ballon et tes chaussures : le depart du cahier, c'est le 22 juillet !",
+"Cette semaine : note ton jonglage 3 jours differents. La regularite avant tout !",
+"Cette semaine : concentre-toi sur ton MAUVAIS pied. Essaie de battre ton record !",
+"Cette semaine : objectif TETE ! Fais 5 de mieux que ta meilleure semaine.",
+"Derniere ligne droite : vise ton palier final avant la reprise du 18 aout !",
+"C'est la reprise ! Bravo pour ton ete de champion, on se retrouve au stade."]};
+function semaineCourante(){const u10=(typeof categorie==='function'&&categorie()==='U10-U11');const now=new Date();const d0=new Date(u10?'2026-07-06':'2026-07-22');const fin=new Date('2026-08-18');const nb=u10?6:4;if(now<d0)return -1;if(now>fin)return nb;return Math.min(nb-1,Math.floor((now-d0)/(7*864e5)));}
+function renderDefiSemaine(){const e=document.getElementById('defi-semaine-txt');if(!e)return;const liste=DEFIS_CAT[(typeof categorie==='function')?categorie():'U12-U13'];const s=semaineCourante();e.textContent=liste[s+1];}
+function trackAssiduite(){try{const d=new Date().toISOString().slice(0,10);S.jours=S.jours||[];if(S.jours.indexOf(d)<0){S.jours.push(d);persist();}}catch(e){}const n=(S.jours||[]).length;const en=document.getElementById('assiduite-n');if(en)en.textContent=n;const es=document.getElementById('assiduite-s');if(es)es.textContent=n>1?'s':'';}
+function checkCelebration(){try{S.celebres=S.celebres||{};const pf=getPaliers()[3];const types={B:{v:bestByType('B'),o:pf.bon,t:'BON PIED'},M:{v:bestByType('M'),o:pf.mau,t:'MAUVAIS PIED'},T:{v:bestByType('T'),o:pf.tet,t:'TETE'}};
+for(const k in types){if(types[k].v>=types[k].o&&!S.celebres[k]){S.celebres[k]=true;persist();showCelebration('OBJECTIF FINAL '+types[k].t+' ATTEINT !','Enorme ! Tu as atteint l\'objectif du coach ('+types[k].o+' jongles). Continue comme ca, champion !');break;}}}catch(e){}}
+function showCelebration(titre,msg){let ov=document.getElementById('celebration-ov');if(ov)ov.remove();ov=document.createElement('div');ov.id='celebration-ov';ov.style.cssText='position:fixed;inset:0;z-index:500;background:rgba(10,26,63,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center';
+let conf='';for(let i=0;i<40;i++){const l=Math.random()*100,dl=Math.random()*2,dr=2+Math.random()*2,cl=['#FFE000','#fff','#4CAF50','#ff5252','#40c4ff'][i%5];conf+='<span style="position:absolute;top:-20px;left:'+l+'%;width:10px;height:14px;background:'+cl+';border-radius:2px;animation:confchute '+dr+'s '+dl+'s linear infinite"></span>';}
+ov.innerHTML=conf+'<div style="font-size:56px;line-height:1">🏆</div><div style="font-family:\'Anton\';font-size:26px;color:var(--yellow);margin:14px 0 8px">'+titre+'</div><p style="color:#fff;font-size:15px;max-width:300px">'+msg+'</p><button class="btn" style="margin-top:20px" onclick="document.getElementById(\'celebration-ov\').remove()">Trop fort !</button>';
+document.body.appendChild(ov);}
 function renderMotStaff(){
   const cat=(typeof categorie==='function')?categorie():(S.equipe||'U12-U13');
+  const dd=document.getElementById('depart-date');if(dd)dd.textContent=(cat==='U10-U11')?'Lun. 6 juil.':'Mer. 22 juil.';
+  const ss=document.getElementById('seances-sub');if(ss)ss.textContent=(cat==='U10-U11')?'24 seances du 6 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.':'16 seances du 22 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.';
   const txt=document.getElementById('mot-staff-texte');
   const liste=document.getElementById('mot-staff-liste');
   if(!txt)return;
@@ -1183,9 +1467,9 @@ function renderMotStaff(){
     if(liste)liste.style.display='';
   }
 }
-function refreshStats(){const sj=document.getElementById('stat-jongle');if(!sj)return;sj.textContent=S.record||0;var sf=document.getElementById('stat-seancesfaites');if(sf)sf.textContent=countSeancesFaites();document.getElementById('stat-seances').textContent=countSeances();document.getElementById('stat-penbut').textContent=S.pen.buts||0;document.getElementById('stat-memo').textContent=(S.memoBest!=null)?S.memoBest+' coups':'-';document.getElementById('stat-defis').textContent=countDefis();document.getElementById('stat-jours').textContent=daysLeft();progress('og-bon','og-mauvais','og-tete','ob-bon','ob-mauvais','ob-tete');progress('s-og-bon','s-og-mauvais','s-og-tete','s-ob-bon','s-ob-mauvais','s-ob-tete');const om=document.getElementById('obj-msg');if(om){const palf=(typeof getPaliers==='function')?getPaliers()[3]:{bon:100,mau:50,tet:50};const objTot=palf.bon+palf.mau+palf.tet;const tot=bestByType('B')+bestByType('M')+bestByType('T');const pct=Math.round(tot/objTot*100);om.textContent=pct>=100?'Tous les objectifs atteints, incroyable !':(pct>=50?'Plus de la moitie du chemin, continue !':(tot>0?'C\'est parti, chaque jongle compte !':'Va dans Seances pour noter tes jonglages.'));}renderBadges();renderWeekStats();renderJongleStats();renderChart();}
+function refreshStats(){const sj=document.getElementById('stat-jongle');if(!sj)return;sj.textContent=S.record||0;var sf=document.getElementById('stat-seancesfaites');if(sf)sf.textContent=countSeancesFaites();document.getElementById('stat-seances').textContent=countSeances();document.getElementById('stat-penbut').textContent=S.pen.buts||0;document.getElementById('stat-memo').textContent=(S.memoBest!=null)?S.memoBest+' coups':'-';document.getElementById('stat-defis').textContent=countDefis();document.getElementById('stat-jours').textContent=daysLeft();progress('og-bon','og-mauvais','og-tete','ob-bon','ob-mauvais','ob-tete');progress('s-og-bon','s-og-mauvais','s-og-tete','s-ob-bon','s-ob-mauvais','s-ob-tete');const om=document.getElementById('obj-msg');if(om){const palf=(typeof getPaliers==='function')?getPaliers()[3]:{bon:100,mau:50,tet:50};const objTot=palf.bon+palf.mau+palf.tet;const tot=bestByType('B')+bestByType('M')+bestByType('T');const pct=Math.round(tot/objTot*100);om.textContent=pct>=100?'Tous les objectifs atteints, incroyable !':(pct>=50?'Plus de la moitie du chemin, continue !':(tot>0?'C\'est parti, chaque jongle compte !':'Va dans Seances pour noter tes jonglages.'));}renderBadges();renderWeekStats();renderJongleStats();renderChart();checkCelebration();}
 
-function runIA(){const box=document.getElementById('ia-analyse');if(!box)return;const bon=bestByType('B'),mau=bestByType('M'),tet=bestByType('T'),rec=S.record||0;const sea=countSeances(),def=countDefis(),buts=S.pen.buts||0,tirs=S.pen.tirs||0,badges=BADGES.filter(b=>b[3]()).length;const p=S.prenom||'champion';const L=[];L.push('<b>Bilan de '+p+'</b>');const tObj=Math.min(100,Math.round((bon/100+mau/50+tet/50)/3*100));L.push('Objectifs du coach : '+tObj+' pour cent atteints. '+(tObj>=100?'Tout est boucle, chapeau.':tObj>=66?'Super lancee, accroche-toi.':tObj>=33?'Bon debut, il reste du travail.':'Le plus dur c\'est de commencer, vas-y.'));if(rec>0){L.push('Record de jonglage : '+rec+'. '+(mau>=bon*0.6?'Ton pied faible suit bien ton bon pied, c\'est precieux.':bon>0?'Travaille ton pied faible ('+mau+') pour rattraper le bon pied ('+bon+').':''));L.push(tet<10?'La tete est ton point a bosser ('+tet+'). Quelques series chaque jour.':'Belle maitrise de la tete ('+tet+').');}else L.push('Pas encore de jonglage note. File dans Seances.');L.push(sea>=15?sea+' exercices realises, un vrai bosseur.':sea>=5?sea+' exercices realises, continue la regularite paie.':sea+' exercices pour l\'instant. Vise 3-4 seances par semaine.');if(tirs>0){const r=Math.round(buts/tirs*100);L.push('Tirs au but : '+buts+'/'+tirs+' ('+r+' pour cent). '+(r>=60?'Quel buteur.':'Varie les coins pour tromper le gardien.'));}if(def>0)L.push(def+' defi(s) releve(s). Les defis font progresser vite.');L.push('Tu as debloque '+badges+' badge(s) sur '+BADGES.length+'. '+(badges>=8?'Collection de legende.':'Continue.'));const cons=['Pense a bien t\'echauffer avant chaque seance.','Bois de l\'eau regulierement, surtout l\'ete.','Le plus important : prends du plaisir avec le ballon.','Filme tes jongles, c\'est motivant de voir tes progres.','Entraine-toi avec un copain, on progresse ensemble.'];L.push('<b>Conseil du jour :</b> '+cons[daysLeft()%cons.length]);box.innerHTML=L.map(l=>'<p style="margin-bottom:8px">'+l+'</p>').join('');}
+function runIA(){const box=document.getElementById('ia-analyse');if(!box)return;const bon=bestByType('B'),mau=bestByType('M'),tet=bestByType('T'),rec=S.record||0;const sea=countSeances(),def=countDefis(),buts=S.pen.buts||0,tirs=S.pen.tirs||0,badges=BADGES.filter(b=>b[3]()).length;const p=S.prenom||'champion';const L=[];L.push('<b>Bilan de '+p+'</b>');const _pf=getPaliers()[3];const tObj=Math.min(100,Math.round((bon/_pf.bon+mau/_pf.mau+tet/_pf.tet)/3*100));L.push('Objectifs du coach : '+tObj+' pour cent atteints. '+(tObj>=100?'Tout est boucle, chapeau.':tObj>=66?'Super lancee, accroche-toi.':tObj>=33?'Bon debut, il reste du travail.':'Le plus dur c\'est de commencer, vas-y.'));if(rec>0){L.push('Record de jonglage : '+rec+'. '+(mau>=bon*0.6?'Ton pied faible suit bien ton bon pied, c\'est precieux.':bon>0?'Travaille ton pied faible ('+mau+') pour rattraper le bon pied ('+bon+').':''));L.push(tet<10?'La tete est ton point a bosser ('+tet+'). Quelques series chaque jour.':'Belle maitrise de la tete ('+tet+').');}else L.push('Pas encore de jonglage note. File dans Seances.');L.push(sea>=15?sea+' exercices realises, un vrai bosseur.':sea>=5?sea+' exercices realises, continue la regularite paie.':sea+' exercices pour l\'instant. Vise 3-4 seances par semaine.');if(tirs>0){const r=Math.round(buts/tirs*100);L.push('Tirs au but : '+buts+'/'+tirs+' ('+r+' pour cent). '+(r>=60?'Quel buteur.':'Varie les coins pour tromper le gardien.'));}if(def>0)L.push(def+' defi(s) releve(s). Les defis font progresser vite.');L.push('Tu as debloque '+badges+' badge(s) sur '+BADGES.length+'. '+(badges>=8?'Collection de legende.':'Continue.'));const cons=['Pense a bien t\'echauffer avant chaque seance.','Bois de l\'eau regulierement, surtout l\'ete.','Le plus important : prends du plaisir avec le ballon.','Filme tes jongles, c\'est motivant de voir tes progres.','Entraine-toi avec un copain, on progresse ensemble.'];L.push('<b>Conseil du jour :</b> '+cons[daysLeft()%cons.length]);box.innerHTML=L.map(l=>'<p style="margin-bottom:8px">'+l+'</p>').join('');}
 
 // COACH
 function coachLogin(){const code=document.getElementById('coach-code').value.trim();const msg=document.getElementById('coach-msg');if(code===COACH_CODE){document.getElementById('coach-login').style.display='none';document.getElementById('coach-dash').classList.add('show');loadCoachData();}else{msg.textContent='Code incorrect.';msg.style.color='var(--red)';}}
@@ -1198,6 +1482,16 @@ function renderCoach(){const f=document.getElementById('coach-filter').value;let
   const jongletot=rows.reduce((a,r)=>a+(r.rec_bon||0)+(r.rec_mau||0)+(r.rec_tete||0),0);set('c-jongletot',jongletot);
   set('c-seancemoy',n?Math.round(sfaites/n):0);
   let bu=null;rows.forEach(r=>{if(!bu||(r.pen_buts||0)>(bu.pen_buts||0))bu=r;});set('c-buteur',(bu&&(bu.pen_buts||0)>0)?(bu.prenom||'?')+' ('+bu.pen_buts+')':'-');
+  // ===== 3 classements avec noms (cliquables vers la fiche) =====
+  function _jeuxDe(r){try{const f=JSON.parse(r.fiche||'{}');return f._jeux||{};}catch(e){return {};}}
+  function pointsJeux(r){const j=_jeuxDe(r);return (j.quiz||0)+(j.vf||0)+(j.tact||0)+(j.qsj||0)+(j.pendu||0)*2+(j.simon||0)*2;}
+  function _rangHTML(list,valFn,unite){if(!list.length)return '<p style="color:var(--grey);font-size:13px">Aucune donnee pour le moment.</p>';
+    const med=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    return list.map((r,i)=>{const idxG=COACH_DATA.indexOf(r);const rang=i<3?med[i]:'<b style="color:var(--grey)">'+(i+1)+'.</b>';
+      return '<div onclick="showFiche('+idxG+')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;background:'+(i%2?'transparent':'rgba(29,56,143,.05)')+'"><span style="width:26px;text-align:center">'+rang+'</span><span style="flex:1;font-weight:700">'+(r.prenom||'?')+' '+(r.nom||'')+' <span style="font-weight:400;color:var(--grey);font-size:12px">'+(r.equipe||'')+'</span></span><b style="color:var(--blue)">'+valFn(r)+unite+'</b></div>';}).join('');}
+  const czS=document.getElementById('classement-seances');if(czS){const l=[...rows].sort((a,b)=>(b.seances_faites||0)-(a.seances_faites||0));czS.innerHTML=_rangHTML(l,r=>(r.seances_faites||0),' seances');}
+  const czJ=document.getElementById('classement-jongle');if(czJ){const tot=r=>(r.rec_bon||0)+(r.rec_mau||0)+(r.rec_tete||0);const l=[...rows].sort((a,b)=>tot(b)-tot(a));czJ.innerHTML=_rangHTML(l,tot,' jongles');}
+  const czX=document.getElementById('classement-jeux');if(czX){const l=[...rows].sort((a,b)=>pointsJeux(b)-pointsJeux(a));czX.innerHTML=_rangHTML(l,pointsJeux,' pts');}
   // graphique seances faites par joueur
   const cs=document.getElementById('chart-seances');if(cs){const tops=[...rows].filter(r=>(r.seances_faites||0)>0).sort((a,b)=>(b.seances_faites||0)-(a.seances_faites||0)).slice(0,12);if(!tops.length)cs.innerHTML='<p style="color:var(--grey);font-size:13px">Aucune seance enregistree.</p>';else{const mx=Math.max(...tops.map(r=>r.seances_faites||0),1);cs.innerHTML=tops.map(r=>{const pct=Math.round((r.seances_faites||0)/mx*100);return '<div class="barlabel" style="margin-top:8px"><span>'+(r.prenom||'?')+' <span style="color:var(--grey)">'+(r.equipe||'')+'</span></span><span>'+(r.seances_faites||0)+'</span></div><div class="bar"><i style="width:'+pct+'%;background:linear-gradient(90deg,var(--ok),#7BD389)"></i></div>';}).join('');}}
   // jonglage libre
@@ -1249,6 +1543,8 @@ function _jeuxHTML(f){
     +'<tr><td class="k">Simon (meilleur niveau)</td><td>'+(j.simon||0)+'</td><td class="k">Reflexe (meilleur temps)</td><td>'+reflex+'</td></tr>'
     +'<tr><td class="k">Memory</td><td>'+memo+'</td><td class="k">Memory nations</td><td>'+memo2+'</td></tr>'
     +'<tr><td class="k">Pendu (parties gagnees)</td><td>'+(j.pendu||0)+'</td><td class="k">Mots croises</td><td>'+(j.xw?'Termine':'-')+'</td></tr>'
+    +'<tr><td class="k">Tactique (bonnes decisions)</td><td>'+(j.tact||0)+'</td><td class="k">Qui suis-je (points)</td><td>'+(j.qsj||0)+'</td></tr>'
+    +'<tr><td class="k">Assiduite (jours d\'ouverture)</td><td>'+(j.jours||0)+'</td><td class="k"></td><td></td></tr>'
     +'</table>';
 }
 // ===== EXPORT PDF FICHE JOUEUR (COACH) =====
@@ -1363,7 +1659,7 @@ async function resetAll(){if(!confirm('Tout effacer sur cet appareil ? Tes score
 
 initCloud();showLoginIfNeeded();
 bindInputs();updateNames();calcAge();calcIMC();toggleMutation();updateSyncPill();
-renderPlanning();renderPaliers();renderVideos();renderFree();buildPen();buildWS();buildXW();buildScramble();newMemo();newMemo2();buildVF();buildIntrus();newPendu();buildReflex();buildSimon();buildQuiz();refreshStats();runIA();renderMotStaff();
+renderPlanning();renderPaliers();renderVideos();renderFree();buildPen();buildWS();buildXW();buildScramble();newMemo();newMemo2();buildVF();buildIntrus();newPendu();buildReflex();buildSimon();buildQuiz();buildTact();buildQSJ();refreshStats();runIA();renderMotStaff();renderBadges();renderDefiSemaine();trackAssiduite();
 syncCloud();
 
 
