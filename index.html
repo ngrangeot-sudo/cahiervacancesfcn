@@ -240,7 +240,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     </div>
     <button onclick="logoutJoueur()" title="Se deconnecter" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">Deconnexion</button>
   </div>
-  <div class="datebar"><div class="d"><span>Depart</span><b id="depart-date">Mer. 22 juil.</b></div><div class="d"><span>Reprise</span><b>Mar. 18 aout</b></div></div>
+  <div class="datebar"><div class="d"><span>Depart</span><b id="depart-date">Sam. 18 juil.</b></div><div class="d"><span>Reprise</span><b>Mar. 18 aout</b></div></div>
   <div class="countdown">Reprise dans <span id="cd">-</span> jours</div>
   <div class="devise">Quand on n'a pas tout donne, on n'a rien donne</div>
 </header>
@@ -912,27 +912,27 @@ function getPaliers(){return PALIERS_CAT[categorie()];}
 Object.defineProperty(window,'PALIERS',{get:function(){return getPaliers();}});
 // 16 seances datees, simples (sans chrono ni corde), centrees jonglage
 const SEANCES_U12=[
- {date:'2026-07-22',sem:0,t:'Seance 1',obj:'On se remet en route en douceur.',exos:[
+ {date:'2026-07-18',sem:0,t:'Seance 1',obj:'On se remet en route en douceur.',exos:[
   ['Echauffement complet','Commence par marcher 1 minute. Ensuite, fais 10 cercles avec chaque bras vers l\'avant puis l\'arriere, 10 rotations de hanches dans chaque sens, et 10 montees de genoux sur place. Termine par secouer les jambes et les bras pour bien relacher.'],
   ['Partie physique','Fais 5 montees de genoux dynamiques sur place, puis 5 talons-fesses, et 3 petits sprints de 10 metres a 70%. Repose-toi entre chaque. On reveille les jambes en douceur.','Fais 8 montees de genoux dynamiques, 8 talons-fesses, puis 4 sprints de 15 metres a bonne allure avec 20 secondes de repos entre chaque. On commence a pousser un peu plus fort.'],
   ['Petit gainage','Mets-toi en position de planche : sur les avant-bras et la pointe des pieds, le corps bien droit comme une barre. Serre le ventre et tiens le temps que tu peux (vise 15 a 20 secondes). Repose-toi 30 secondes et recommence 2 fois.','Position de planche sur les avant-bras, corps bien droit. Tiens 25 a 30 secondes, repose 30 secondes, et recommence 3 fois. Serre bien le ventre et les fessiers.'],
   ['Le ballon, mon copain','Pose le pied sur le ballon et fais-le rouler : avant-arriere, gauche-droite, avec la semelle. Puis touche-le doucement de l\'interieur du pied droit, puis gauche, pour le sentir. Prends 5 minutes pour t\'amuser avec.']]},
- {date:'2026-07-23',sem:0,t:'Seance 2',obj:'Reveil musculaire et toucher de balle.',exos:[
+ {date:'2026-07-20',sem:0,t:'Seance 2',obj:'Reveil musculaire et toucher de balle.',exos:[
   ['Echauffement','Marche rapide 1 minute, puis trottine tranquillement 2 minutes. Fais quelques pas chasses (deplacements sur le cote) et secoue bien les jambes.'],
   ['Partie physique','Fais 2 series de 8 squats (plie les jambes comme pour t\'asseoir, dos droit). Puis 5 petits sauts pieds joints. Repose entre les series.','Fais 3 series de 12 squats, dos bien droit et descente controlee. Puis 10 sauts pieds joints et 5 sauts en extension (monte les bras vers le ciel). Repose 30 secondes entre les series.'],
   ['Conduite tranquille','Promene le ballon au pied en marchant. Garde le ballon proche de toi, touche-le a chaque pas avec l\'interieur du pied. Change de direction de temps en temps.'],
   ['Gainage','Une planche sur les avant-bras, tiens le temps que tu peux. Refais 2 fois.','Une planche classique puis une planche sur chaque cote. Tiens 20-25 secondes chacune, refais l\'ensemble 2 fois.']]},
- {date:'2026-07-24',sem:0,t:'Seance 3',obj:'Equilibre, appuis et vitesse.',exos:[
+ {date:'2026-07-22',sem:0,t:'Seance 3',obj:'Equilibre, appuis et vitesse.',exos:[
   ['Echauffement articulaire','Fais des cercles avec les chevilles (10 par pied), puis les genoux, puis les bras. Termine par 10 petits sauts sur place.'],
   ['Partie physique - vitesse','Fais 4 accelerations de 10 metres : pars doucement et accelere progressivement. Marche pour revenir et recuperer. On travaille la vitesse en s\'amusant.','Fais 6 accelerations de 15 metres en partant vite, avec retour en marchant. Puis 4 demarrages explosifs sur 5 metres (le plus vite possible sur les premiers appuis).'],
   ['Equilibre','Tiens-toi sur un seul pied pendant 10 secondes, puis change de pied. Si c\'est facile, ferme les yeux. Fais 3 fois chaque pied.'],
   ['Gainage doux','Position de la planche, sur les genoux si c\'est trop dur. Tiens 15 secondes, refais 2 fois.','Planche complete + gainage lateral de chaque cote. Tiens 25 secondes chaque position.']]},
- {date:'2026-07-25',sem:0,t:'Seance 4',obj:'Premiere semaine, jongle un max !',exos:[
+ {date:'2026-07-24',sem:0,t:'Seance 4',obj:'Premiere semaine, jongle un max !',exos:[
   ['Echauffement','Trottine 2 minutes, fais quelques pas chasses et des montees de genoux. Termine par des cercles de bras et de chevilles.'],
   ['Partie physique - renfo','Fais 2 series de 6 fentes par jambe (avance un pied, plie les deux jambes, remonte). Garde le dos droit.','Fais 3 series de 10 fentes par jambe, puis 8 fentes sautees (change de jambe en sautant). Dos droit, mouvement controle.'],
   ['Gainage','Planche sur les avant-bras, tiens ton meilleur temps. Refais 2 fois.','Planche + planche laterale des deux cotes, 2 tours complets.'],
   ['Concours de jongles','Echauffe-toi avec quelques jongles tranquilles, puis essaie de battre ton meilleur score et vise ton palier de la semaine.']]},
- {date:'2026-07-28',sem:1,t:'Seance 5',obj:'On monte d\'un cran.',exos:[
+ {date:'2026-07-27',sem:1,t:'Seance 5',obj:'On monte d\'un cran.',exos:[
   ['Echauffement complet','Marche 1 minute puis trottine 2 minutes. Monte les genoux bien haut sur 15 metres, puis fais des talons-fesses sur 15 metres.'],
   ['Partie physique','Fais 3 accelerations de 15 metres, puis 2 series de 8 squats. Repose entre chaque. On combine vitesse et force.','Fais 5 accelerations de 20 metres, 3 series de 12 squats, et 6 sauts en extension. Recuperation active en marchant entre les series.'],
   ['Gainage','Position de la planche, essaie de tenir un peu plus longtemps que la derniere fois (vise 25 secondes). Refais 2 fois.','Planche + gainage lateral, tiens 30 secondes chaque position, 3 tours.'],
@@ -952,7 +952,7 @@ const SEANCES_U12=[
   ['Partie physique','Fais 2 series de 8 squats et 6 fentes par jambe. Puis 3 accelerations de 15 metres.','Fais 3 series de 12 squats, 10 fentes par jambe et 5 sprints de 20 metres. Recuperation en marchant.'],
   ['Renfo gainage','Planche sur les avant-bras, 2 fois ton meilleur temps.','Planche + laterale des deux cotes + gainage dynamique, 3 tours.'],
   ['Concours de jongles','Echauffe-toi puis donne tout pour viser tes paliers de la semaine, surtout le pied faible et la tete !']]},
- {date:'2026-08-04',sem:2,t:'Seance 9',obj:'On devient plus fort.',exos:[
+ {date:'2026-08-03',sem:2,t:'Seance 9',obj:'On devient plus fort.',exos:[
   ['Echauffement complet','Trottine 3 minutes en variant l\'allure. Fais montees de genoux, talons-fesses, et 2-3 accelerations en marchant.'],
   ['Partie physique','Fais 3 series de 8 squats, 6 fentes par jambe et 5 sauts pieds joints. Repose entre chaque serie.','Fais 4 series de 12 squats, 10 fentes, 8 squats sautes et 6 sauts en extension. Enchaine avec peu de repos pour travailler l\'intensite.'],
   ['Gainage','Planche, vise le plus longtemps possible (30 secondes ou plus). Refais 2 fois.','Planche 40 secondes + laterale 30 secondes chaque cote, 3 tours.'],
@@ -972,7 +972,7 @@ const SEANCES_U12=[
   ['Partie physique','Fais 3 series de 8 squats, 6 fentes par jambe et 3 accelerations de 15 metres.','Fais 4 series combinees : 12 squats + 10 fentes + 5 sprints de 20 metres. Peu de repos, on pousse fort avant la derniere semaine.'],
   ['Renfo gainage','Planche, ton meilleur temps, 2 fois.','Planche + laterale + dynamique, 3 tours de 35 secondes.'],
   ['Concours de jongles','Echauffe-toi puis enchaine pied, cuisse, tete si tu peux. Vise tes paliers de la semaine 3, ils montent !']]},
- {date:'2026-08-11',sem:3,t:'Seance 13',obj:'Derniere ligne droite.',exos:[
+ {date:'2026-08-10',sem:3,t:'Seance 13',obj:'Derniere ligne droite.',exos:[
   ['Echauffement complet','Trottine 3 minutes, varie les allures. Montees de genoux, talons-fesses, pas chasses, et 3 accelerations.'],
   ['Partie physique','Fais 3 series de 8 squats, 6 fentes et 4 accelerations de 15 metres. On garde le rythme.','Fais 4 series : 15 squats + 12 fentes + 6 sprints de 20 metres + 8 squats sautes. Recuperation courte. Objectif : etre au top pour la reprise.'],
   ['Gainage','Planche, essaie de battre ton meilleur temps ! Puis planche laterale. 2 tours.','Planche 45 secondes + laterale 35 secondes chaque cote + dynamique, 3 tours.'],
@@ -987,7 +987,7 @@ const SEANCES_U12=[
   ['Partie physique - endurance','Trottine sans t\'arreter 5 minutes, puis fais 4 accelerations de 15 metres.','Cours 7 minutes a allure reguliere, puis 6 accelerations de 20 metres et 8 squats sautes. On travaille le souffle et la puissance.'],
   ['Gainage','Planche solide, ton record ! Puis planche laterale de chaque cote. 2 tours.','Planche 45 secondes + laterale 40 secondes + dynamique, 3 tours.'],
   ['Jeu libre','Amuse-toi avec le ballon : conduis, dribble un objet, fais des gestes techniques, et enchaine des jongles.']]},
- {date:'2026-08-18',sem:3,t:'Seance 16',obj:'Derniere seance, prets pour la reprise !',exos:[
+ {date:'2026-08-15',sem:3,t:'Seance 16',obj:'Derniere seance, prets pour la reprise !',exos:[
   ['Echauffement comme avant un match','Trottine 3 minutes, monte les genoux, talons-fesses, pas chasses, 3-4 accelerations. Echauffe-toi serieusement comme un vrai joueur.'],
   ['Partie physique','Fais un petit circuit : 8 squats, 6 fentes par jambe, 5 sauts pieds joints, 3 accelerations. Tranquille, sans forcer.','Circuit complet : 12 squats + 10 fentes + 8 squats sautes + 5 sprints de 20 metres + 30 secondes de gainage. Un dernier bon effort avant la reprise !'],
   ['Gainage et souplesse','Une planche, quelques etirements doux des jambes. Prepare bien ton corps.','Planche + laterale + etirements complets. Termine en souplesse.'],
@@ -1218,7 +1218,7 @@ const SMONTHS=['jan','fev','mar','avr','mai','juin','juil','aout','sep','oct','n
 const SEANCE_DAYS=[1,2,4,5];
 function renderPlanning(){
   const box=document.getElementById('planning');if(!box)return;S.planDone=S.planDone||{};S.planSupp=S.planSupp||{};
-  const start=new Date((typeof categorie==='function'&&categorie()==='U10-U11')?'2026-07-06':'2026-07-22'),end=new Date('2026-08-18');
+  const start=new Date((typeof categorie==='function'&&categorie()==='U10-U11')?'2026-07-06':'2026-07-18'),end=new Date('2026-08-18');
   let weeks=[];let curWeek=[];let cur=new Date(start);
   while(cur<=end){curWeek.push(new Date(cur));if(cur.getDay()===0){weeks.push(curWeek);curWeek=[];}cur.setDate(cur.getDate()+1);}
   if(curWeek.length)weeks.push(curWeek);
@@ -1431,13 +1431,13 @@ const DEFIS_CAT={
 "Derniere ligne droite : vise ton palier final avant la reprise du 18 aout !",
 "C'est la reprise ! Bravo pour ton ete de champion, on se retrouve au stade."],
 'U12-U13':[
-"Prepare ton ballon et tes chaussures : le depart du cahier, c'est le 22 juillet !",
+"Prepare ton ballon et tes chaussures : le depart du cahier, c'est le 18 juillet !",
 "Cette semaine : note ton jonglage 3 jours differents. La regularite avant tout !",
 "Cette semaine : concentre-toi sur ton MAUVAIS pied. Essaie de battre ton record !",
 "Cette semaine : objectif TETE ! Fais 5 de mieux que ta meilleure semaine.",
 "Derniere ligne droite : vise ton palier final avant la reprise du 18 aout !",
 "C'est la reprise ! Bravo pour ton ete de champion, on se retrouve au stade."]};
-function semaineCourante(){const u10=(typeof categorie==='function'&&categorie()==='U10-U11');const now=new Date();const d0=new Date(u10?'2026-07-06':'2026-07-22');const fin=new Date('2026-08-18');const nb=u10?6:4;if(now<d0)return -1;if(now>fin)return nb;return Math.min(nb-1,Math.floor((now-d0)/(7*864e5)));}
+function semaineCourante(){const u10=(typeof categorie==='function'&&categorie()==='U10-U11');const now=new Date();const d0=new Date(u10?'2026-07-06':'2026-07-18');const fin=new Date('2026-08-18');const nb=u10?6:4;if(now<d0)return -1;if(now>fin)return nb;return Math.min(nb-1,Math.floor((now-d0)/(7*864e5)));}
 function renderDefiSemaine(){const e=document.getElementById('defi-semaine-txt');if(!e)return;const liste=DEFIS_CAT[(typeof categorie==='function')?categorie():'U12-U13'];const s=semaineCourante();e.textContent=liste[s+1];}
 function trackAssiduite(){try{const d=new Date().toISOString().slice(0,10);S.jours=S.jours||[];if(S.jours.indexOf(d)<0){S.jours.push(d);persist();}}catch(e){}const n=(S.jours||[]).length;const en=document.getElementById('assiduite-n');if(en)en.textContent=n;const es=document.getElementById('assiduite-s');if(es)es.textContent=n>1?'s':'';}
 function checkCelebration(){try{S.celebres=S.celebres||{};const pf=getPaliers()[3];const types={B:{v:bestByType('B'),o:pf.bon,t:'BON PIED'},M:{v:bestByType('M'),o:pf.mau,t:'MAUVAIS PIED'},T:{v:bestByType('T'),o:pf.tet,t:'TETE'}};
@@ -1448,8 +1448,8 @@ ov.innerHTML=conf+'<div style="font-size:56px;line-height:1">🏆</div><div styl
 document.body.appendChild(ov);}
 function renderMotStaff(){
   const cat=(typeof categorie==='function')?categorie():(S.equipe||'U12-U13');
-  const dd=document.getElementById('depart-date');if(dd)dd.textContent=(cat==='U10-U11')?'Lun. 6 juil.':'Mer. 22 juil.';
-  const ss=document.getElementById('seances-sub');if(ss)ss.textContent=(cat==='U10-U11')?'24 seances du 6 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.':'16 seances du 22 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.';
+  const dd=document.getElementById('depart-date');if(dd)dd.textContent=(cat==='U10-U11')?'Lun. 6 juil.':'Sam. 18 juil.';
+  const ss=document.getElementById('seances-sub');if(ss)ss.textContent=(cat==='U10-U11')?'24 seances du 6 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.':'16 seances du 18 juillet au 18 aout. Touche une seance pour l\'ouvrir, la faire et l\'envoyer au coach.';
   const txt=document.getElementById('mot-staff-texte');
   const liste=document.getElementById('mot-staff-liste');
   if(!txt)return;
