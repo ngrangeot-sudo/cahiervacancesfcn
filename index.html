@@ -805,7 +805,7 @@ if(_last.code&&!S.joueurCode)S.joueurCode=_last.code;
 if(_last.equipe&&!S.equipe)S.equipe=_last.equipe;
 if(!S.pen)S.pen={buts:0,tirs:0,serie:0,cur:0};
 // auto-reparation : la categorie prevue par le coach s'impose meme sur les donnees deja enregistrees
-try{if(typeof trouverCodeAutorise==='function'){const _ci=trouverCodeAutorise(S.joueurCode);if(_ci&&_ci.cat&&S.equipe!==_ci.cat){S.equipe=_ci.cat;}}}catch(e){}
+try{if(typeof trouverCodeAutorise==='function'){const _ci=trouverCodeAutorise(S.joueurCode);if(_ci&&_ci.cat&&S.equipe!==_ci.cat){S.equipe=_ci.cat;try{localStorage.setItem(dataKey(S.joueurCode),JSON.stringify(S));}catch(e2){}}}}catch(e){}
 function persist(){try{
   if(S.joueurCode){localStorage.setItem(dataKey(S.joueurCode),JSON.stringify(S));localStorage.setItem(LAST_KEY,JSON.stringify({code:S.joueurCode,equipe:S.equipe||''}));}
   else{localStorage.setItem(dataKey('invite'),JSON.stringify(S));}
