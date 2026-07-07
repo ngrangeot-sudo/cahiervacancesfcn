@@ -207,6 +207,15 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
   #coach-dash.show>.card.wide{grid-column:1 / -1;}
 }
 @keyframes confchute{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(110vh) rotate(720deg)}}
+.ctable{width:100%;border-collapse:collapse;font-size:12.5px;min-width:520px}
+.ctable th{background:var(--blue);color:#fff;padding:6px 8px;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.ctable td{padding:6px 8px;border-bottom:1px solid #e3e9f6;white-space:nowrap}
+.ctable tr:nth-child(even) td{background:#f4f7fd}
+.ctable .pj{font-weight:700;cursor:pointer;color:var(--blue)}
+.pbar{background:#e3e9f6;border-radius:8px;height:10px;width:110px;display:inline-block;vertical-align:middle;overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#3f6ad8);border-radius:8px}
+.cell-pal{border-radius:6px;padding:3px 6px;font-weight:700;font-size:11.5px;display:inline-block;min-width:64px;text-align:center}
+.pal-ok{background:#d8f5dc;color:#1b7a2a}.pal-mi{background:#fff3c4;color:#8a6d00}.pal-no{background:#eef1f7;color:#8a94ab}
 </style>
 </head>
 <body>
@@ -633,7 +642,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     <div class="card full wide">
       <h2>Vue d'ensemble</h2>
       <label>Filtrer par categorie</label>
-      <select id="coach-filter" onchange="renderCoach()"><option value="">Toutes</option><option>U10-U11</option><option>U12-U13</option></select>
+      <button class="btn sm" style="margin-bottom:8px" onclick="loadCoachData()">🔄 Actualiser</button> <select id="coach-filter" onchange="renderCoach()"><option value="">Toutes</option><option>U10-U11</option><option>U12-U13</option></select>
       <div class="rgrid" style="margin-top:14px">
         <div class="rstat"><div class="v" id="c-joueurs">0</div><div class="l">Joueurs</div></div>
         <div class="rstat y"><div class="v" id="c-actifs7">0</div><div class="l">Actifs 7 jours</div></div>
@@ -657,6 +666,10 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
     <div class="card full"><h2>🏅 Classement Jongle</h2><p class="sub">Total des records bon pied + mauvais pied + tete. Touche un nom pour ouvrir sa fiche.</p><div id="classement-jongle"></div></div>
     <div class="card full"><h2>🏅 Classement Jeux</h2><p class="sub">Points cumules sur tous les jeux (quiz, tactique, qui suis-je, pendu, memoire...). Touche un nom pour ouvrir sa fiche.</p><div id="classement-jeux"></div></div>
 
+    <div class="card full wide"><h2>📋 Séances faites (tous les joueurs)</h2><p class="sub">Avancement de chaque joueur sur son programme, en nombre de seances et en pourcentage.</p><div id="tab-seances" style="overflow-x:auto"></div></div>
+    <div class="card full wide"><h2>⚽ Jonglages par semaine et paliers</h2><p class="sub">Records B (bon pied) / M (mauvais pied) / T (tete) de chaque semaine. Vert = les 3 paliers de la semaine atteints, jaune = en partie, gris = pas encore.</p><div id="tab-paliers" style="overflow-x:auto"></div></div>
+    <div class="card full wide"><h2>🦶 Records bon pied / mauvais pied / tête</h2><p class="sub">Meilleurs records de l'ete, tries par total.</p><div id="tab-bmt" style="overflow-x:auto"></div></div>
+    <div class="card full wide"><h2>🔥 Classement jonglage libre</h2><p class="sub">Records et volume de l'onglet Jongle (jonglage libre).</p><div id="tab-libre" style="overflow-x:auto"></div></div>
     <div class="card full"><h2>Records de jonglage par joueur</h2><p class="sub">Comparaison des records (seances guidees).</p><div id="chart-bars"></div></div>
     <div class="card full"><h2>Seances faites par joueur</h2><p class="sub">Qui s'entraine le plus regulierement.</p><div id="chart-seances"></div></div>
 
@@ -707,7 +720,9 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
    -> NE PAS mettre la cle secrete (sb_secret_...) */
 const SUPABASE_URL = "https://ewsncbrzzsxytazhnuzb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_29sjcMzZZDP3pRloAEBRMg_g8RaatyL";
-const COACH_CODE = "noidanais2026";
+const COACH_CODE = "fcn702026";
+/* Acces coachs supplementaires (donnent le meme acces a l'espace coach) */
+const COACH_CODES = ["fcn702026","coachu10","coachu11","coachu12","coachu13"];
 
 /* ===== LISTE DES CODES JOUEURS AUTORISES - a remplir par le coach =====
    Chaque ligne = un enfant : {code:"...", prenom:"...", cat:"U10-U11" ou "U12-U13"}
@@ -740,6 +755,7 @@ const CODES_AUTORISES = [
   {code:"simonnor", prenom:"Simon", cat:"U10-U11"},
   {code:"ilanoss", prenom:"Ilan", cat:"U10-U11"},
   {code:"arthurver", prenom:"Arthur", cat:"U10-U11"},
+  {code:"sashber", prenom:"Sasha", cat:"U10-U11"},
   {code:"aarondel", prenom:"Aaron", cat:"U12-U13"},
   {code:"evanalc", prenom:"Evan", cat:"U12-U13"},
   {code:"hugogue", prenom:"Hugo", cat:"U12-U13"},
@@ -766,10 +782,7 @@ const CODES_AUTORISES = [
   {code:"comelau", prenom:"Come", cat:"U12-U13"},
   {code:"martinmer", prenom:"Martin", cat:"U12-U13"},
   {code:"enzoter", prenom:"Enzo", cat:"U12-U13"},
-{code:"coachu10", prenom:"Enzo", cat:"U10-U11"},
-{code:"coachu11", prenom:"Enzo", cat:"U10-U11"},
   {code:"nolanrob", prenom:"Nolan", cat:"U12-U13"},
-{code:"sashber", prenom:"Sasha", cat:"U12-U13"},
   {code:"ilanfau", prenom:"Ilan", cat:"U12-U13"},
 ];
 function trouverCodeAutorise(code){
@@ -1489,9 +1502,11 @@ function refreshStats(){const sj=document.getElementById('stat-jongle');if(!sj)r
 function runIA(){const box=document.getElementById('ia-analyse');if(!box)return;const bon=bestByType('B'),mau=bestByType('M'),tet=bestByType('T'),rec=S.record||0;const sea=countSeances(),def=countDefis(),buts=S.pen.buts||0,tirs=S.pen.tirs||0,badges=BADGES.filter(b=>b[3]()).length;const p=S.prenom||'champion';const L=[];L.push('<b>Bilan de '+p+'</b>');const _pf=getPaliers()[3];const tObj=Math.min(100,Math.round((bon/_pf.bon+mau/_pf.mau+tet/_pf.tet)/3*100));L.push('Objectifs du coach : '+tObj+' pour cent atteints. '+(tObj>=100?'Tout est boucle, chapeau.':tObj>=66?'Super lancee, accroche-toi.':tObj>=33?'Bon debut, il reste du travail.':'Le plus dur c\'est de commencer, vas-y.'));if(rec>0){L.push('Record de jonglage : '+rec+'. '+(mau>=bon*0.6?'Ton pied faible suit bien ton bon pied, c\'est precieux.':bon>0?'Travaille ton pied faible ('+mau+') pour rattraper le bon pied ('+bon+').':''));L.push(tet<10?'La tete est ton point a bosser ('+tet+'). Quelques series chaque jour.':'Belle maitrise de la tete ('+tet+').');}else L.push('Pas encore de jonglage note. File dans Seances.');L.push(sea>=15?sea+' exercices realises, un vrai bosseur.':sea>=5?sea+' exercices realises, continue la regularite paie.':sea+' exercices pour l\'instant. Vise 3-4 seances par semaine.');if(tirs>0){const r=Math.round(buts/tirs*100);L.push('Tirs au but : '+buts+'/'+tirs+' ('+r+' pour cent). '+(r>=60?'Quel buteur.':'Varie les coins pour tromper le gardien.'));}if(def>0)L.push(def+' defi(s) releve(s). Les defis font progresser vite.');L.push('Tu as debloque '+badges+' badge(s) sur '+BADGES.length+'. '+(badges>=8?'Collection de legende.':'Continue.'));const cons=['Pense a bien t\'echauffer avant chaque seance.','Bois de l\'eau regulierement, surtout l\'ete.','Le plus important : prends du plaisir avec le ballon.','Filme tes jongles, c\'est motivant de voir tes progres.','Entraine-toi avec un copain, on progresse ensemble.'];L.push('<b>Conseil du jour :</b> '+cons[daysLeft()%cons.length]);box.innerHTML=L.map(l=>'<p style="margin-bottom:8px">'+l+'</p>').join('');}
 
 // COACH
-function coachLogin(){const code=document.getElementById('coach-code').value.trim();const msg=document.getElementById('coach-msg');if(code===COACH_CODE){document.getElementById('coach-login').style.display='none';document.getElementById('coach-dash').classList.add('show');loadCoachData();}else{msg.textContent='Code incorrect.';msg.style.color='var(--red)';}}
+function coachLogin(){const code=document.getElementById('coach-code').value.trim().toLowerCase();const msg=document.getElementById('coach-msg');if(COACH_CODES.indexOf(code)>-1){document.getElementById('coach-login').style.display='none';document.getElementById('coach-dash').classList.add('show');loadCoachData();}else{msg.textContent='Code incorrect.';msg.style.color='var(--red)';}}
 let COACH_DATA=[];
-async function loadCoachData(){const liste=document.getElementById('c-liste');if(!cloudOn||!sb){liste.innerHTML='<p style="color:var(--grey);font-size:13px">La base partagee n\'est pas configuree. Renseigne SUPABASE_URL (doit finir par .supabase.co) et SUPABASE_ANON_KEY en haut du fichier.</p>';renderCoach();return;}liste.innerHTML='<p style="color:var(--grey);font-size:13px">Chargement...</p>';try{const {data,error}=await sb.from('joueurs').select('*').order('record',{ascending:false});if(error)throw error;COACH_DATA=data||[];renderCoach();}catch(e){liste.innerHTML='<p style="color:var(--red);font-size:13px">Erreur : '+(e.message||e)+'</p>';}}
+let coachRefreshTimer=null;
+function startCoachAutoRefresh(){clearInterval(coachRefreshTimer);coachRefreshTimer=setInterval(()=>{const d=document.getElementById('coach-dash');if(d&&d.classList.contains('show')&&document.getElementById('v-coach').classList.contains('active')){loadCoachData();}},45000);}
+async function loadCoachData(){startCoachAutoRefresh();const liste=document.getElementById('c-liste');if(!cloudOn||!sb){liste.innerHTML='<p style="color:var(--grey);font-size:13px">La base partagee n\'est pas configuree. Renseigne SUPABASE_URL (doit finir par .supabase.co) et SUPABASE_ANON_KEY en haut du fichier.</p>';renderCoach();return;}liste.innerHTML='<p style="color:var(--grey);font-size:13px">Chargement...</p>';try{const {data,error}=await sb.from('joueurs').select('*').order('record',{ascending:false});if(error)throw error;COACH_DATA=data||[];renderCoach();}catch(e){liste.innerHTML='<p style="color:var(--red);font-size:13px">Erreur : '+(e.message||e)+'</p>';}}
 function paliersJoueur(r){const bon=Math.max(r.rec_bon||0,r.free_best||0),mau=r.rec_mau||0,tet=r.rec_tete||0;const pal=PALIERS_CAT[r.equipe]||PALIERS_CAT['U12-U13'];let n=0;for(let s=0;s<4;s++){const p=pal[s];if(bon>=p.bon)n++;if(mau>=p.mau)n++;if(tet>=p.tet)n++;}return n;}
 function renderCoach(){const f=document.getElementById('coach-filter').value;let rows=COACH_DATA.filter(r=>!f||r.equipe===f);const n=rows.length;const recs=rows.map(r=>r.record||0);const moy=n?Math.round(recs.reduce((a,b)=>a+b,0)/n):0;const max=n?Math.max(...recs):0;const exo=rows.reduce((a,r)=>a+(r.exercices||0),0);const sfaites=rows.reduce((a,r)=>a+(r.seances_faites||0),0);const defis=rows.reduce((a,r)=>a+(r.defis||0),0);const buts=rows.reduce((a,r)=>a+(r.pen_buts||0),0);const tirs=rows.reduce((a,r)=>a+(r.pen_tirs||0),0);const now=Date.now();const a7=rows.filter(r=>r.maj&&(now-new Date(r.maj).getTime())<7*864e5).length;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('c-joueurs',n);set('c-jongle-moy',moy);set('c-jongle-max',max);set('c-seances',exo);set('c-seancesfaites',sfaites);set('c-defis',defis);set('c-penbut',buts);set('c-pentir',tirs);set('c-penpct',tirs?Math.round(buts/tirs*100)+'%':'0%');set('c-actifs7',a7);
   // stats supplementaires
@@ -1509,6 +1524,60 @@ function renderCoach(){const f=document.getElementById('coach-filter').value;let
   const czS=document.getElementById('classement-seances');if(czS){const l=[...rows].sort((a,b)=>(b.seances_faites||0)-(a.seances_faites||0));czS.innerHTML=_rangHTML(l,r=>(r.seances_faites||0),' seances');}
   const czJ=document.getElementById('classement-jongle');if(czJ){const tot=r=>(r.rec_bon||0)+(r.rec_mau||0)+(r.rec_tete||0);const l=[...rows].sort((a,b)=>tot(b)-tot(a));czJ.innerHTML=_rangHTML(l,tot,' jongles');}
   const czX=document.getElementById('classement-jeux');if(czX){const l=[...rows].sort((a,b)=>pointsJeux(b)-pointsJeux(a));czX.innerHTML=_rangHTML(l,pointsJeux,' pts');}
+
+  // ===== TABLEAUX STATISTIQUES DETAILLES =====
+  function _fullDe(r){try{const f=JSON.parse(r.fiche||'{}');return f._full||{};}catch(e){return {};}}
+  function _nomC(r){const idxG=COACH_DATA.indexOf(r);return '<td class="pj" onclick="showFiche('+idxG+')">'+(r.prenom||'?')+' '+(r.nom||'')+'</td>';}
+
+  // T1 - Seances faites avec %
+  const tS=document.getElementById('tab-seances');
+  if(tS){
+    const l=[...rows].sort((a,b)=>(b.seances_faites||0)-(a.seances_faites||0));
+    let h='<table class="ctable"><tr><th>Joueur</th><th>Cat.</th><th>Seances</th><th>Avancement</th><th>%</th></tr>';
+    l.forEach(r=>{const tot=(r.equipe==='U10-U11')?24:16;const n=r.seances_faites||0;const pc=Math.min(100,Math.round(n/tot*100));
+      h+='<tr>'+_nomC(r)+'<td>'+(r.equipe||'')+'</td><td><b>'+n+'</b> / '+tot+'</td><td><span class="pbar"><i style="width:'+pc+'%"></i></span></td><td><b>'+pc+'%</b></td></tr>';});
+    tS.innerHTML=h+'</table>';
+  }
+
+  // T2 - Jonglages par semaine avec paliers
+  const tP=document.getElementById('tab-paliers');
+  if(tP){
+    let h='<table class="ctable"><tr><th>Joueur</th><th>Cat.</th><th>Sem. 1 (B/M/T)</th><th>Sem. 2</th><th>Sem. 3</th><th>Sem. 4</th></tr>';
+    rows.forEach(r=>{
+      const jg=_fullDe(r).jongle||{};
+      const pals=PALIERS_CAT[r.equipe]||PALIERS_CAT['U12-U13'];
+      h+='<tr>'+_nomC(r)+'<td>'+(r.equipe||'')+'</td>';
+      for(let s=0;s<4;s++){
+        const w=jg[s]||{};const b=w.B||0,m=w.M||0,t=w.T||0;const p=pals[s];
+        const okN=(b>=p.bon?1:0)+(m>=p.mau?1:0)+(t>=p.tet?1:0);
+        const cls=(okN===3)?'pal-ok':(okN>0?'pal-mi':'pal-no');
+        const txt=(b||m||t)?(b+' / '+m+' / '+t):'-';
+        h+='<td><span class="cell-pal '+cls+'" title="Paliers : '+p.bon+'/'+p.mau+'/'+p.tet+'">'+txt+'</span></td>';
+      }
+      h+='</tr>';});
+    tP.innerHTML=h+'</table>';
+  }
+
+  // T3 - Records bon pied / mauvais pied / tete
+  const tB=document.getElementById('tab-bmt');
+  if(tB){
+    const tot=r=>(r.rec_bon||0)+(r.rec_mau||0)+(r.rec_tete||0);
+    const l=[...rows].sort((a,b)=>tot(b)-tot(a));
+    let h='<table class="ctable"><tr><th>Joueur</th><th>Cat.</th><th>Bon pied</th><th>Mauvais pied</th><th>Tete</th><th>Total</th></tr>';
+    l.forEach(r=>{h+='<tr>'+_nomC(r)+'<td>'+(r.equipe||'')+'</td><td><b>'+(r.rec_bon||0)+'</b></td><td><b>'+(r.rec_mau||0)+'</b></td><td><b>'+(r.rec_tete||0)+'</b></td><td><b style="color:var(--blue)">'+tot(r)+'</b></td></tr>';});
+    tB.innerHTML=h+'</table>';
+  }
+
+  // T4 - Classement jonglage libre
+  const tL=document.getElementById('tab-libre');
+  if(tL){
+    const l=[...rows].sort((a,b)=>(b.free_best||0)-(a.free_best||0));
+    const med=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+    let h='<table class="ctable"><tr><th>#</th><th>Joueur</th><th>Cat.</th><th>Record libre</th><th>Total jongles</th><th>Sessions</th></tr>';
+    l.forEach((r,i)=>{const rang=i<3?med[i]:(i+1)+'.';
+      h+='<tr><td>'+rang+'</td>'+_nomC(r)+'<td>'+(r.equipe||'')+'</td><td><b>'+(r.free_best||0)+'</b></td><td>'+(r.free_total||0)+'</td><td>'+(r.free_sessions||0)+'</td></tr>';});
+    tL.innerHTML=h+'</table>';
+  }
   // graphique seances faites par joueur
   const cs=document.getElementById('chart-seances');if(cs){const tops=[...rows].filter(r=>(r.seances_faites||0)>0).sort((a,b)=>(b.seances_faites||0)-(a.seances_faites||0)).slice(0,12);if(!tops.length)cs.innerHTML='<p style="color:var(--grey);font-size:13px">Aucune seance enregistree.</p>';else{const mx=Math.max(...tops.map(r=>r.seances_faites||0),1);cs.innerHTML=tops.map(r=>{const pct=Math.round((r.seances_faites||0)/mx*100);return '<div class="barlabel" style="margin-top:8px"><span>'+(r.prenom||'?')+' <span style="color:var(--grey)">'+(r.equipe||'')+'</span></span><span>'+(r.seances_faites||0)+'</span></div><div class="bar"><i style="width:'+pct+'%;background:linear-gradient(90deg,var(--ok),#7BD389)"></i></div>';}).join('');}}
   // jonglage libre
@@ -1697,7 +1766,7 @@ async function resetAll(){if(!confirm('Tout effacer sur cet appareil ? Tes score
 
 initCloud();showLoginIfNeeded();
 bindInputs();updateNames();calcAge();calcIMC();toggleMutation();updateSyncPill();
-renderPlanning();renderPaliers();renderVideos();renderFree();buildPen();buildWS();buildXW();buildScramble();newMemo();newMemo2();buildVF();buildIntrus();newPendu();buildReflex();buildSimon();buildQuiz();buildTact();buildQSJ();refreshStats();runIA();renderMotStaff();renderBadges();renderDefiSemaine();trackAssiduite();
+renderPlanning();renderPaliers();renderVideos();renderFree();buildPen();buildWS();buildXW();buildScramble();newMemo();newMemo2();buildVF();buildIntrus();newPendu();buildReflex();buildSimon();buildQuiz();buildTact();buildQSJ();refreshStats();runIA();renderMotStaff();renderBadges();renderDefiSemaine();trackAssiduite();if(S.joueurCode&&S.equipe)syncCloud();
 syncCloud();
 
 
