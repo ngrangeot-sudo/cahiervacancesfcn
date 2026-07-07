@@ -707,7 +707,7 @@ table.ctable td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--
    -> NE PAS mettre la cle secrete (sb_secret_...) */
 const SUPABASE_URL = "https://ewsncbrzzsxytazhnuzb.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_29sjcMzZZDP3pRloAEBRMg_g8RaatyL";
-const COACH_CODE = "fcn702026";
+const COACH_CODE = "noidanais2026";
 
 /* ===== LISTE DES CODES JOUEURS AUTORISES - a remplir par le coach =====
    Chaque ligne = un enfant : {code:"...", prenom:"...", cat:"U10-U11" ou "U12-U13"}
@@ -764,13 +764,7 @@ const CODES_AUTORISES = [
   {code:"youssoufgri", prenom:"Youssouf", cat:"U12-U13"},
   {code:"enzojac", prenom:"Enzo", cat:"U12-U13"},
   {code:"comelau", prenom:"Come", cat:"U12-U13"},
- {code:"sashber", prenom:"Sasha", cat:"U10-U11"},
-
   {code:"martinmer", prenom:"Martin", cat:"U12-U13"},
- {code:"coachu10", prenom:"Martin", cat:"U10-U11"},
- {code:"coachu11", prenom:"Martin", cat:"U10-U11"},
- {code:"coachu12", prenom:"Martin", cat:"U12-U13"},
- {code:"coachu13", prenom:"Martin", cat:"U12-U13"},
   {code:"enzoter", prenom:"Enzo", cat:"U12-U13"},
   {code:"nolanrob", prenom:"Nolan", cat:"U12-U13"},
   {code:"ilanfau", prenom:"Ilan", cat:"U12-U13"},
@@ -834,8 +828,16 @@ async function loginJoueur(){
   if(cloudOn&&sb){
     try{const {data}=await sb.from('joueurs').select('*').eq('id',code).maybeSingle();
       if(data){
-        let cloudFull=null;
-        if(data.fiche){try{const f=JSON.parse(data.fiche);if(f._full)cloudFull=f._full;}catch(e){}}
+        let cloudFull=null,fParsed=null;
+        if(data.fiche){try{fParsed=JSON.parse(data.fiche);if(fParsed._full)cloudFull=fParsed._full;}catch(e){}}
+        // MARQUEUR DE RESET : si le coach a remis ce joueur a zero apres la derniere activite
+        // de cet appareil, on efface les donnees locales au lieu de les renvoyer
+        const resetTs=(fParsed&&fParsed._reset)||0;
+        if(resetTs>(S._reset_done||0)&&resetTs>=(S._full_ts||0)){
+          const prenomGarde=(codeInfo&&codeInfo.prenom)||data.prenom||'';
+          S={joueurCode:code,equipe:catChoisie,prenom:prenomGarde,pen:{buts:0,tirs:0,serie:0,cur:0},_reset_done:resetTs};
+          persist();
+        }else{
         // Synchro complete entre appareils : on garde la version la plus recente (local vs cloud)
         const localTs=(S._full_ts||0);
         const cloudTs=(cloudFull&&cloudFull._ts)||0;
@@ -849,7 +851,9 @@ async function loginJoueur(){
           // le local est plus recent : on complete juste les infos de fiche manquantes
           S.prenom=S.prenom||data.prenom;S.nom=S.nom||data.nom;
         }
+        if(resetTs>(S._reset_done||0))S._reset_done=resetTs;
         persist();
+        }
       }
     }catch(e){}
   }
@@ -885,7 +889,7 @@ function buildSummary(){
   fiche._jeux={quiz:quizOk,vf:vfOk,simon:S.simonBest||0,reflex:S.reflexBest||0,memo:(S.memoBest!=null?S.memoBest:null),memo2:(S.memo2Best!=null?S.memo2Best:null),pendu:S.penduWins||0,xw:!!S.xwDone,tact:tactOk,qsj:qsjPts,jours:(S.jours||[]).length};
   // etat COMPLET du joueur pour synchro entre appareils (tablette <-> telephone)
   // on copie tout S sauf le code (redondant) et on horodate
-  try{const full={};Object.keys(S).forEach(k=>{if(k!=='joueurCode')full[k]=S[k];});full._ts=S._full_ts||Date.now();fiche._full=full;}catch(e){}
+  try{const full={};Object.keys(S).forEach(k=>{if(k!=='joueurCode')full[k]=S[k];});full._ts=S._full_ts||Date.now();fiche._full=full;if(S._reset_done)fiche._reset=S._reset_done;}catch(e){}
   let age=null;if(S.naissance){const d=new Date(S.naissance),t=new Date();age=t.getFullYear()-d.getFullYear();if(t.getMonth()<d.getMonth()||(t.getMonth()===d.getMonth()&&t.getDate()<d.getDate()))age--;}
   const numeroNum=(S.numero!==undefined&&S.numero!==null&&(''+S.numero).trim()!=='')?parseInt(S.numero,10):null;
   const numeroFinal=(numeroNum!==null&&!isNaN(numeroNum))?numeroNum:null;
@@ -1644,10 +1648,31 @@ function pdfTousJoueurs(){
 }
 
 // reset des scores d'un joueur (garde la fiche)
-async function resetJoueur(idx){const r=COACH_DATA[idx];if(!r)return;if(!confirm('Remettre a zero les scores de '+(r.prenom||'ce joueur')+' ? Sa fiche est conservee.'))return;if(!cloudOn||!sb){alert('Base non connectee.');return;}try{const upd={record:0,rec_bon:0,rec_mau:0,rec_tete:0,exercices:0,defis:0,pen_buts:0,pen_tirs:0,free_best:0,free_total:0,free_sessions:0,seances_faites:0,maj:new Date().toISOString()};const {error}=await sb.from('joueurs').update(upd).eq('id',r.id);if(error)throw error;await loadCoachData();document.getElementById('c-fiche-card').style.display='none';alert('Scores de '+(r.prenom||'')+' remis a zero.');}catch(e){alert('Erreur : '+(e.message||e));}}
+async function resetJoueur(idx){const r=COACH_DATA[idx];if(!r)return;if(!confirm('Remettre a zero les scores de '+(r.prenom||'ce joueur')+' ? Sa fiche perso est conservee. Ses appareils seront nettoyes a sa prochaine connexion.'))return;if(!cloudOn||!sb){alert('Base non connectee.');return;}
+try{
+  // conserver la fiche perso (poste, preferences...) mais effacer l'etat complet, les jeux, et poser le marqueur de reset
+  let f={};try{f=JSON.parse(r.fiche||'{}');}catch(e){f={};}
+  delete f._full;delete f._jeux;
+  f._reset=Date.now();
+  const upd={record:0,rec_bon:0,rec_mau:0,rec_tete:0,exercices:0,defis:0,pen_buts:0,pen_tirs:0,free_best:0,free_total:0,free_sessions:0,seances_faites:0,fiche:JSON.stringify(f),maj:new Date().toISOString()};
+  const {error}=await sb.from('joueurs').update(upd).eq('id',r.id);if(error)throw error;
+  await loadCoachData();document.getElementById('c-fiche-card').style.display='none';
+  alert('Scores de '+(r.prenom||'')+' remis a zero. Ses appareils repartiront de zero a sa prochaine connexion.');
+}catch(e){alert('Erreur : '+(e.message||e));}}
 // reset global des scores (garde les fiches)
-async function resetGlobal(){if(!confirm('RESET GLOBAL : remettre a zero les scores de TOUS les joueurs ? Les fiches sont conservees. Action irreversible.'))return;if(!confirm('Es-tu vraiment sur ? Tous les jonglages, exercices et penos repartent a zero.'))return;const msg=document.getElementById('reset-msg');if(!cloudOn||!sb){if(msg){msg.textContent='Base non connectee.';msg.style.color='var(--red)';}return;}msg.textContent='Reset en cours...';msg.style.color='var(--grey)';try{const upd={record:0,rec_bon:0,rec_mau:0,rec_tete:0,exercices:0,defis:0,pen_buts:0,pen_tirs:0,free_best:0,free_total:0,free_sessions:0,seances_faites:0,maj:new Date().toISOString()};const {error}=await sb.from('joueurs').update(upd).neq('id','___none___');if(error)throw error;await loadCoachData();msg.textContent='Tous les scores ont ete remis a zero.';msg.style.color='var(--ok)';}catch(e){msg.textContent='Erreur : '+(e.message||e);msg.style.color='var(--red)';}}
-async function deleteJoueur(idx){const r=COACH_DATA[idx];if(!r)return;if(!confirm('SUPPRIMER totalement '+(r.prenom||'ce joueur')+' ? Sa fiche ET ses stats seront effacees definitivement de la base.'))return;if(!cloudOn||!sb){alert('Base non connectee.');return;}try{const {error}=await sb.from('joueurs').delete().eq('id',r.id);if(error)throw error;await loadCoachData();document.getElementById('c-fiche-card').style.display='none';alert((r.prenom||'Le joueur')+' a ete supprime de la base.');}catch(e){alert('Erreur : '+(e.message||e));}}
+async function resetGlobal(){if(!confirm('RESET GLOBAL : remettre a zero les scores de TOUS les joueurs ? Les fiches perso sont conservees. Leurs appareils seront nettoyes a leur prochaine connexion.'))return;if(!confirm('Es-tu vraiment sur ? Tous les jonglages, exercices, jeux et penos repartent a zero.'))return;const msg=document.getElementById('reset-msg');if(!cloudOn||!sb){if(msg){msg.textContent='Base non connectee.';msg.style.color='var(--red)';}return;}
+msg.textContent='Reset en cours...';msg.style.color='var(--grey)';
+try{
+  const {data,error:e1}=await sb.from('joueurs').select('id,fiche');if(e1)throw e1;
+  const now=Date.now();
+  for(const row of (data||[])){
+    let f={};try{f=JSON.parse(row.fiche||'{}');}catch(e){f={};}
+    delete f._full;delete f._jeux;f._reset=now;
+    const upd={record:0,rec_bon:0,rec_mau:0,rec_tete:0,exercices:0,defis:0,pen_buts:0,pen_tirs:0,free_best:0,free_total:0,free_sessions:0,seances_faites:0,fiche:JSON.stringify(f),maj:new Date().toISOString()};
+    await sb.from('joueurs').update(upd).eq('id',row.id);
+  }
+  await loadCoachData();msg.textContent='Tous les scores ont ete remis a zero. Les appareils des joueurs repartiront de zero a leur prochaine connexion.';msg.style.color='var(--ok)';
+}catch(e){msg.textContent='Erreur : '+(e.message||e);msg.style.color='var(--red)';}}
 async function deleteAll(){if(!confirm('TOUT SUPPRIMER : effacer DEFINITIVEMENT tous les joueurs (fiches + stats) de la base ?'))return;if(!confirm('Derniere confirmation : cette action est IRREVERSIBLE. Tout sera perdu.'))return;const msg=document.getElementById('reset-msg');if(!cloudOn||!sb){if(msg){msg.textContent='Base non connectee.';msg.style.color='var(--red)';}return;}msg.textContent='Suppression...';msg.style.color='var(--grey)';try{const {error}=await sb.from('joueurs').delete().neq('id','___none___');if(error)throw error;await loadCoachData();msg.textContent='Tous les joueurs ont ete supprimes de la base.';msg.style.color='var(--ok)';}catch(e){msg.textContent='Erreur : '+(e.message||e);msg.style.color='var(--red)';}}
 async function resetTout(){if(!confirm('REMISE A ZERO COMPLETE : cette action va effacer TOUS les joueurs de la base partagee ET toutes les donnees de cet appareil (ta fiche, tes scores, tous les onglets). Tout repart de zero. Continuer ?'))return;if(!confirm('Derniere confirmation : action IRREVERSIBLE. Tout sera efface.'))return;const msg=document.getElementById('reset-msg');if(msg){msg.textContent='Remise a zero en cours...';msg.style.color='var(--grey)';}
   // 1) vider la base partagee si connectee
@@ -1660,8 +1685,8 @@ async function resetTout(){if(!confirm('REMISE A ZERO COMPLETE : cette action va
 function exportCSV(){if(!COACH_DATA.length){alert('Aucune donnee a exporter.');return;}const cols=['prenom','nom','equipe','age','seances_faites','record','rec_bon','rec_mau','rec_tete','free_best','free_total','free_sessions','exercices','defis','pen_buts','pen_tirs','poste1','joueurpref','maj'];let csv=cols.join(';')+'\n';COACH_DATA.forEach(r=>{csv+=cols.map(c=>{let v=r[c];if(v==null)v='';return '"'+String(v).replace(/"/g,'""')+'"';}).join(';')+'\n';});const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='joueurs-fcn.csv';a.click();}
 
 async function resetAll(){if(!confirm('Tout effacer sur cet appareil ? Tes scores, jongles, jeux et ta fiche seront supprimes, et tu reviendras a l\'ecran de code. Action definitive.'))return;
-  // si connecte au cloud, supprimer aussi de la base partagee
-  try{if(cloudOn&&sb&&S.joueurCode){await sb.from('joueurs').delete().eq('id',S.joueurCode);}}catch(e){}
+  // remettre la ligne a zero dans la base avec un marqueur de reset (les autres appareils de l'enfant se nettoieront aussi)
+  try{if(cloudOn&&sb&&S.joueurCode){const upd={record:0,rec_bon:0,rec_mau:0,rec_tete:0,exercices:0,defis:0,pen_buts:0,pen_tirs:0,free_best:0,free_total:0,free_sessions:0,seances_faites:0,fiche:JSON.stringify({_reset:Date.now()}),maj:new Date().toISOString()};await sb.from('joueurs').update(upd).eq('id',S.joueurCode);}}catch(e){}
   // effacer uniquement l'espace de CE joueur (les autres enfants gardent leurs donnees)
   try{if(S.joueurCode)localStorage.removeItem(dataKey(S.joueurCode));localStorage.removeItem(dataKey('invite'));localStorage.removeItem(LAST_KEY);}catch(e){}
   try{sessionStorage.removeItem('cahierSession');}catch(e){}
